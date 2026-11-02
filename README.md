@@ -3,7 +3,7 @@
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-green)](https://www.minecraft.net/)
 [![NeoForge](https://img.shields.io/badge/NeoForge-21.1%2B-orange)](https://neoforged.net/)
 [![Create](https://img.shields.io/badge/Create-6.x-blue)](https://modrinth.com/mod/create)
-[![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-lightgrey)](#许可--license)
+[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey)](https://creativecommons.org/licenses/by-nc/4.0/)
 
 面向 **机械动力（Create）服务器**的优化与网络管理附属。
 
@@ -192,9 +192,19 @@ msptWarnEnabled = true
 
 ## 许可
 
-**All Rights Reserved**
+本项目采用 **[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)**（署名—非商业性使用 4.0 国际）。
 
-未经作者书面许可，不得重新分发、修改后再分发，或用于商业用途。
+你可以自由地：
+
+- **共享** —— 以任何媒介或格式复制、发行本作品
+- **演绎** —— 修改、转换或以本作品为基础进行创作
+
+但必须遵守以下条款：
+
+- **署名** —— 必须给出适当的署名，提供指向本许可协议的链接，并说明是否作了修改。可以以任何合理的方式署名，但不得暗示作者为你或你的使用背书
+- **非商业性使用** —— 不得将本作品用于商业目的
+
+完整法律条款见 [LICENSE](LICENSE)。
 
 ---
 
@@ -380,6 +390,16 @@ The codebase grew out of an internal optimization project the team has since ret
 
 ## License
 
-**All Rights Reserved**
+This project is licensed under **[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)** (Attribution-NonCommercial 4.0 International).
 
-Redistribution, redistribution after modification, or commercial use requires written permission from the author.
+You are free to:
+
+- **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material
+
+Under the following terms:
+
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use
+- **NonCommercial** — You may not use the material for commercial purposes
+
+See [LICENSE](LICENSE) for the full legal text.

@@ -104,5 +104,5 @@ assets/create_cir_addition/lang/zh_tw.json
 
 ## 授权
 
-提交贡献即表示你同意你的代码以本项目的许可证（All Rights Reserved）发布，
+提交贡献即表示你同意你的代码以本项目的许可证（CC BY-NC 4.0）发布，
 并授权项目维护者在必要时调整许可证。
