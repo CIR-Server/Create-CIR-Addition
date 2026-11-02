@@ -2,6 +2,23 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [3.3.1] - 2026-11-02
+
+### 修复
+
+- **垃圾桶界面打不开**。`/cir trashbin` 之前点了没任何反应——服务端正常打开了菜单，客户端却什么都不显示。
+
+  原因是 NeoForge 的自定义 `MenuType` 必须在客户端注册一个 Screen 工厂。漏了这一步时，服务端的
+  `openMenu` 发出的 `OpenScreen` 包到达客户端后会去 `MenuScreens` 里查界面工厂，查不到就返回 null，
+  接着 `Minecraft.setScreen(null)`，结果是**静默失败**：不显示界面、不报错、服务端还以为已经打开了。
+
+  新增两个类：
+  - `client/TrashBinScreen` —— 复用原版 6 行箱子贴图（`generic_54`，176×222，和 6×9 槽位布局完全匹配）
+  - `client/ClientSetup` —— 在 `RegisterMenuScreensEvent` 里注册，整个类用 `Dist.CLIENT` 限定，
+    避免服务端加载时因为引用 `AbstractContainerScreen` 而抛 `NoClassDefFoundError`
+
+  > 这个问题从老版本 Duolingo Super 就存在，是移植时原样带过来的。老版本 jar 里同样没有任何 `*Screen` 类。
+
 ## [3.3.0] - 2026-11-02
 
 ### 新增
