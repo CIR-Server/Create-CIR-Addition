@@ -79,18 +79,24 @@ Create 的 `RedstoneLinkNetworkHandler.updateNetworkOf` 每次被调用都要遍
 
 ### MSPT 预警
 
-每 30 秒采样一次服务器 MSPT：
+每 30 秒采样一次服务器 MSPT，四档：**40 / 45 / 50 / 70**（白 → 黄 → 金 → 红）。
 
-- **35 / 40 / 45** —— 仅在 MSPT **正在上升**时广播（白 → 黄 → 金）
-- **≥ 50** —— 每 30 秒无条件广播（红色）
+**读到超线不会立刻报，要等 3 秒复检一次。**
 
-下降或波动不打扰玩家。
+- 第二次仍在**同一档位或更高** → 按第二次的读数和档位广播
+- 第二次掉档 → 完全静默
+
+这样一次磁盘 IO、一次 GC 不会惊动任何人，只有持续性负载才会报出来。
+
+`≥ 70` 时每次确认都会广播，直到降下来。
+
+> 40–50 这三档都还在「每 tick 有余量」的范围内（50 才是刚好用满 20 TPS），它们的作用是提前告知趋势。真正需要处理的是 70。
 
 ### 扫地与垃圾桶
 
 **没有定时扫地。** 触发方式只有两种：
 
-- MSPT ≥ 50 时自动清理
+- MSPT ≥ 70（红色档确认后）自动清理
 - 管理员执行 `/cir cleanup`
 
 被清理的物品**不会消失**，而是进垃圾桶，**有效期 1 小时**。玩家用 `/cir trashbin` 打开界面取回。
@@ -108,7 +114,7 @@ Create 的 `RedstoneLinkNetworkHandler.updateNetworkOf` 每次被调用都要遍
 
 ## 安装
 
-1. 下载 `create_cir_addition-3.3.0.jar`
+1. 下载 `create_cir_addition-3.3.2.jar`
 2. 放进 `mods/` 目录（客户端和服务端都要）
 3. 启动一次，生成 `config/create_cir_addition.toml`
 4. 按需调整配置，改完 `/reload` 或重启
@@ -174,7 +180,7 @@ redstoneLinkOptimization = true    # 支持 /cir 指令热切换
 
 ```toml
 cleanupIgnoreNamed = true     # 保护带自定义名称的物品
-cleanupOnHighMspt = true      # MSPT ≥ 50 时自动清理
+cleanupOnHighMspt = true      # MSPT 到红色档（≥ 70）时自动清理
 ```
 
 ### 预警
@@ -278,18 +284,24 @@ On first world load the world spawn becomes the base. Change it later with `/cir
 
 ### MSPT warnings
 
-Samples server MSPT every 30 seconds:
+Samples server MSPT every 30 seconds, four tiers: **40 / 45 / 50 / 70** (white → yellow → gold → red).
 
-- **35 / 40 / 45** — broadcast only while MSPT is **rising** (white → yellow → gold)
-- **≥ 50** — unconditional broadcast every 30 seconds (red)
+**A reading above a threshold does not broadcast immediately.** The monitor waits 3 seconds and samples again:
 
-Falling or fluctuating values stay quiet.
+- Second reading still in the **same tier or higher** → broadcast using the second reading's value and tier
+- Tier dropped → complete silence
+
+One disk flush or one GC pause will not bother anyone; only sustained load gets reported.
+
+At `≥ 70` every confirmed reading is broadcast until the value drops.
+
+> Tiers 40–50 all sit inside "still has headroom per tick" territory (50 is exactly 20 TPS). Their job is to show a trend early. 70 is the one that actually needs attention.
 
 ### Item cleanup and trash bin
 
 **No timer-based cleanup.** Only two triggers:
 
-- Automatic when MSPT ≥ 50
+- Automatic when MSPT reaches the red tier (≥ 70) and is confirmed
 - Manual via `/cir cleanup`
 
 Swept items are **not destroyed** — they go into a trash bin that stays valid for **1 hour**, reopened with `/cir trashbin`.
@@ -307,7 +319,7 @@ Items with a custom name are protected by default (configurable).
 
 ## Installation
 
-1. Download `create_cir_addition-3.3.0.jar`
+1. Download `create_cir_addition-3.3.2.jar`
 2. Drop it into `mods/` (client **and** server)
 3. Launch once to generate `config/create_cir_addition.toml`
 4. Adjust the config as needed, then `/reload` or restart
@@ -376,7 +388,7 @@ redstoneLinkOptimization = true    # togglable via /cir at runtime
 
 ```toml
 cleanupIgnoreNamed = true     # protect custom-named items
-cleanupOnHighMspt = true      # auto-sweep when MSPT ≥ 50
+cleanupOnHighMspt = true      # auto-sweep when MSPT reaches the red tier (≥ 70)
 ```
 
 ### Warnings
