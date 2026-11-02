@@ -3,7 +3,7 @@
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-green)](https://www.minecraft.net/)
 [![NeoForge](https://img.shields.io/badge/NeoForge-21.1%2B-orange)](https://neoforged.net/)
 [![Create](https://img.shields.io/badge/Create-6.x-blue)](https://modrinth.com/mod/create)
-[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey)](https://creativecommons.org/licenses/by-nc/4.0/)
+[![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey)](https://creativecommons.org/licenses/by-sa/4.0/)
 
 面向 **机械动力（Create）服务器**的优化与网络管理附属。
 
@@ -196,7 +196,7 @@ msptWarnEnabled = true
 
 ## 许可
 
-本项目采用 **[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)**（署名—非商业性使用 4.0 国际）。
+本项目采用 **[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)**（署名—相同方式共享 4.0 国际）。
 
 你可以自由地：
 
@@ -206,7 +206,7 @@ msptWarnEnabled = true
 但必须遵守以下条款：
 
 - **署名** —— 必须给出适当的署名，提供指向本许可协议的链接，并说明是否作了修改。可以以任何合理的方式署名，但不得暗示作者为你或你的使用背书
-- **非商业性使用** —— 不得将本作品用于商业目的
+- **相同方式共享** —— 如果你再混合、转换或以本作品为基础进行创作，必须基于与原作品相同的许可协议分发你的作品
 
 完整法律条款见 [LICENSE](LICENSE)。
 
@@ -398,7 +398,7 @@ The codebase grew out of an internal optimization project the team has since ret
 
 ## License
 
-This project is licensed under **[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)** (Attribution-NonCommercial 4.0 International).
+This project is licensed under **[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)** (Attribution-ShareAlike 4.0 International).
 
 You are free to:
 
@@ -408,6 +408,6 @@ You are free to:
 Under the following terms:
 
 - **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use
-- **NonCommercial** — You may not use the material for commercial purposes
+- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original
 
 See [LICENSE](LICENSE) for the full legal text.
