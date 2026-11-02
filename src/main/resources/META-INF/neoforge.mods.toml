@@ -1,39 +1,50 @@
-# NeoForge 21.1 Mod Metadata (neoforge.mods.toml)
+# ============================================================
+# NeoForge Mod Metadata
+# ------------------------------------------------------------
+# 这个文件里的 ${...} 占位符由 build.gradle 的 processResources 任务
+# 从 gradle.properties 注入，不要手动改这里的版本号。
+# ============================================================
 modLoader="javafml"
-loaderVersion="[4,)"
-license="All Rights Reserved"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
 
 [[mods]]
-modId="create_cir_addition"
-version="3.3.0"
-displayName="Create CIR Addition"
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
 logoFile="logo.png"
-authors="Real_Infinistar/DeepSeek V4.1 Flash"
-description="Optimizes the performance of the Create mod."
+authors="${mod_authors}"
+description='''${mod_description}'''
 
-[[dependencies.create_cir_addition]]
+# ------------------------------------------------------------
+# 依赖
+# ------------------------------------------------------------
+[[dependencies.${mod_id}]]
     modId="neoforge"
     type="required"
-    versionRange="[21.1,)"
+    versionRange="${neo_version_range}"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.create_cir_addition]]
+[[dependencies.${mod_id}]]
     modId="minecraft"
     type="required"
-    versionRange="[1.21.1,1.22)"
+    versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.create_cir_addition]]
+# Create 是硬前置：本模组的所有 mixin 都打在 Create 的类上，
+# 没有 Create 连启动都过不去。
+[[dependencies.${mod_id}]]
     modId="create"
     type="required"
     versionRange="[6.0.0,7.0)"
     ordering="AFTER"
     side="BOTH"
 
-# AE2 是可选依赖：装了才启用量子桥数量限制，没装不影响本模组工作
-[[dependencies.create_cir_addition]]
+# AE2 是可选依赖：装了才启用量子环数量限制，没装则整个功能跳过
+# （CirMixinPlugin 会在 mixin 加载阶段检查，不装就不加载 MixinQuantumBridge）。
+[[dependencies.${mod_id}]]
     modId="ae2"
     type="optional"
     versionRange="[19,)"

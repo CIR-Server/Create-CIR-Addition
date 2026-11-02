@@ -1,0 +1,123 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.78'
+}
+
+version = mod_version
+group = mod_group_id
+base.archivesName = mod_id
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = neo_version
+
+    // 可选：如果以后想用 Parchment 映射，把下面这段打开并填上版本
+    // parchment {
+    //     mappingsVersion = parchment_mappings_version
+    //     minecraftVersion = parchment_minecraft_version
+    // }
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        }
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// ============================================================
+// 依赖来源
+// ------------------------------------------------------------
+// Create 和 AE2 都不在 Maven Central 上，这里走 Modrinth 的 Maven 镜像。
+// 坐标格式是 maven.modrinth:<slug>:<version>，slug 是 Modrinth 上的项目短名。
+// 如果哪天 Modrinth Maven 挂了，可以换成 CurseMaven：
+//   implementation "curse.maven:create-328085:5838779"
+// 具体 file id 在 CurseForge 项目的 Files 页面上能看到。
+// ============================================================
+repositories {
+    maven { url = 'https://api.modrinth.com/maven' }
+    maven { url = 'https://cursemaven.com' }
+    maven { url = 'https://maven.createmod.net' }
+    maven { url = 'https://maven.blamejared.com' }
+    mavenCentral()
+}
+
+dependencies {
+    // Create —— 硬前置，mods.toml 里是 required
+    implementation "maven.modrinth:create:${create_version}"
+
+    // AE2 —— 可选前置。编译期需要它的几个类做反射目标，
+    // 但运行时不装也能启动（QuantumGuard 全部走反射，不做编译期引用，
+    // MixinQuantumBridge 由 CirMixinPlugin 门控）。
+    compileOnly "maven.modrinth:ae2:${ae2_version}"
+
+    // Zstd 压缩库（网络压缩模块用）
+    implementation 'com.github.luben:zstd-jni:1.5.6-4'
+}
+
+// 把 gradle.properties 里的版本号写进 mods.toml
+tasks.withType(ProcessResources).configureEach {
+    def replaceProperties = [
+        minecraft_version      : minecraft_version,
+        minecraft_version_range: minecraft_version_range,
+        neo_version            : neo_version,
+        neo_version_range      : neo_version_range,
+        loader_version_range   : loader_version_range,
+        mod_id                 : mod_id,
+        mod_name               : mod_name,
+        mod_license            : mod_license,
+        mod_version            : mod_version,
+        mod_authors            : mod_authors,
+        mod_description        : mod_description
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+            'Specification-Title'     : mod_id,
+            'Specification-Vendor'    : mod_authors,
+            'Specification-Version'   : '1',
+            'Implementation-Title'    : project.name,
+            'Implementation-Version'  : project.jar.archiveVersion,
+            'Implementation-Vendor'   : mod_authors,
+            // Mixin 配置入口，缺了这一行模组启动时会因为找不到 mixins.json 直接崩
+            'MixinConfigs'            : "${mod_id}.mixins.json"
+        ])
+    }
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url = "file://${project.projectDir}/repo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
