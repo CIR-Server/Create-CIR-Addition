@@ -88,7 +88,15 @@ tasks.withType(ProcessResources).configureEach {
     inputs.properties replaceProperties
 
     filesMatching(['META-INF/neoforge.mods.toml']) {
-        expand replaceProperties
+        // 用 filter 逐行替换 @key@，而不是 expand(replaceProperties)。
+        // expand 会把整个文件交给 Groovy 的 SimpleTemplateEngine，而 TOML 的
+        // 三引号 / 方括号 / 注释语法会让它语法解析失败，实测报
+        //   SimpleTemplateScript1.groovy: 1: Unexpected input: '('
+        filter { line ->
+            replaceProperties.inject(line) { acc, entry ->
+                acc.replace("@${entry.key}@", entry.value.toString())
+            }
+        }
     }
 }
 

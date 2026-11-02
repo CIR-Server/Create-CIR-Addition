@@ -1,41 +1,46 @@
 # ============================================================
 # NeoForge Mod Metadata
 # ------------------------------------------------------------
-# 这个文件里的 ${...} 占位符由 build.gradle 的 processResources 任务
+# 这个文件里的 @...@ 占位符由 build.gradle 的 processResources 任务
 # 从 gradle.properties 注入，不要手动改这里的版本号。
+#
+# 为什么不用 ${...}：Gradle 的 expand() 会把整个文件交给 Groovy 的
+# SimpleTemplateEngine，而 TOML 里的三引号、方括号和注释语法会让它
+# 解析失败（实测报 "Unexpected input: '('"）。改成 @key@ + 逐行 replace
+# 就完全不经过模板引擎了。
 # ============================================================
 modLoader="javafml"
-loaderVersion="${loader_version_range}"
-license="${mod_license}"
+loaderVersion="@loader_version_range@"
+license="@mod_license@"
 
 [[mods]]
-modId="${mod_id}"
-version="${mod_version}"
-displayName="${mod_name}"
+modId="@mod_id@"
+version="@mod_version@"
+displayName="@mod_name@"
 logoFile="logo.png"
-authors="${mod_authors}"
-description='''${mod_description}'''
+authors="@mod_authors@"
+description="@mod_description@"
 
 # ------------------------------------------------------------
 # 依赖
 # ------------------------------------------------------------
-[[dependencies.${mod_id}]]
+[[dependencies.@mod_id@]]
     modId="neoforge"
     type="required"
-    versionRange="${neo_version_range}"
+    versionRange="@neo_version_range@"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.@mod_id@]]
     modId="minecraft"
     type="required"
-    versionRange="${minecraft_version_range}"
+    versionRange="@minecraft_version_range@"
     ordering="NONE"
     side="BOTH"
 
 # Create 是硬前置：本模组的所有 mixin 都打在 Create 的类上，
 # 没有 Create 连启动都过不去。
-[[dependencies.${mod_id}]]
+[[dependencies.@mod_id@]]
     modId="create"
     type="required"
     versionRange="[6.0.0,7.0)"
@@ -44,7 +49,7 @@ description='''${mod_description}'''
 
 # AE2 是可选依赖：装了才启用量子环数量限制，没装则整个功能跳过
 # （CirMixinPlugin 会在 mixin 加载阶段检查，不装就不加载 MixinQuantumBridge）。
-[[dependencies.${mod_id}]]
+[[dependencies.@mod_id@]]
     modId="ae2"
     type="optional"
     versionRange="[19,)"
