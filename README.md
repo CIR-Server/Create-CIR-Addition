@@ -202,7 +202,7 @@ msptWarnEnabled = true
 
 ## AI 使用披露
 
-该项目由 CIR 服务器成员于 2025 年立项进行，后续因成员变动本项目被搁置，2026 年 11 月通过 DeepSeek v4.1 Flash 1017 模型结合此前开发计划和已完成代码补全，因此部分 JAVA 代码由 AI 生成。（模组里面不含 KubeJS）
+该项目由 CIR 服务器成员于 2025 年立项进行，后续因成员变动本项目被搁置，2026 年 11 月通过 DeepSeek v4.1 Flash 1017 模型结合此前开发计划和已完成代码补全，因此部分 JAVA 代码由 AI 生成。
 
 ## 许可
 
@@ -414,7 +414,7 @@ The codebase grew out of an internal optimization project the team has since ret
 
 ## AI Usage Disclosure
 
-This project was started by CIR server members in 2025 and later shelved due to membership changes. In November 2026, the previously planned design and the existing code were completed with the DeepSeek v4.1 Flash 1017 model, so part of the Java code is AI-generated. (The mod itself does not contain KubeJS.)
+This project was started by CIR server members in 2025 and later shelved due to membership changes. In November 2026, the previously planned design and the existing code were completed with the DeepSeek v4.1 Flash 1017 model, so part of the Java code is AI-generated.
 
 ## License
 
