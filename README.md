@@ -55,7 +55,9 @@ Create 的 `RedstoneLinkNetworkHandler.updateNetworkOf` 每次被调用都要遍
 
 客户端与服务端之间的 Create 同步包会按大小自动选择 LZ4 或 Zstd 压缩，小包直接放行避免压缩反而变大。
 
-### 量子环限制（需要 AE2）
+### （可选）量子环限制
+
+> 需要 AE2。没装的话整个功能跳过，其他功能不受影响。
 
 限制 ME 量子环（`ae2:quantum_ring` + `ae2:quantum_link`）的密集程度：
 
@@ -66,6 +68,8 @@ Create 的 `RedstoneLinkNetworkHandler.updateNetworkOf` 每次被调用都要遍
 超出限制的新环会在成型瞬间被拆除，原地留一块黑曜石，并召唤一道**纯视觉效果**的闪电。
 
 计数基于一张持久化的「已登记环坐标表」，不依赖区块加载 —— 半径 4096 格等于 512×512 个区块，实时扫描根本不现实。
+
+数量上限、基地豁免半径、以及是否启用本功能，都可以在 `config/create_cir_addition.toml` 里调整。
 
 ### 基地系统
 
@@ -250,7 +254,9 @@ Toggle at runtime with `/cir redstonelinkoptimization true|false`.
 
 Create sync packets between client and server pick LZ4 or Zstd based on size. Small packets bypass compression entirely so they don't grow.
 
-### Quantum ring limiter (requires AE2)
+### Quantum ring limiter (optional)
+
+> Requires AE2. Without it the whole feature is skipped; everything else keeps working.
 
 Caps how densely ME quantum rings (`ae2:quantum_ring` + `ae2:quantum_link`) can be placed:
 
@@ -261,6 +267,8 @@ Caps how densely ME quantum rings (`ae2:quantum_ring` + `ae2:quantum_link`) can 
 Rings that exceed the limit collapse the instant they form, leaving a single obsidian block and a **visual-only** lightning strike.
 
 Counting is backed by a persistent registry of ring positions, not chunk scanning — a 4096-block radius covers 512×512 chunks, so live scanning is not viable.
+
+The limits, the base exemption radius, and whether the feature is enabled at all are all configurable in `config/create_cir_addition.toml`.
 
 ### Base system
 
