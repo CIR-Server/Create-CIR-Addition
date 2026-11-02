@@ -1,0 +1,36 @@
+# 构建产物
+build/
+out/
+classes/
+stage/
+*.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志与测试运行目录
+*.log
+logs/
+run/
+runs/
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# 本地临时文件
+*.tmp
+*.bak
+*.bak_*

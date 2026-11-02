@@ -1,0 +1,41 @@
+# NeoForge 21.1 Mod Metadata (neoforge.mods.toml)
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="create_cir_addition"
+version="3.3.0"
+displayName="Create CIR Addition"
+logoFile="logo.png"
+authors="Real_Infinistar/DeepSeek V4.1 Flash"
+description="Optimizes the performance of the Create mod."
+
+[[dependencies.create_cir_addition]]
+    modId="neoforge"
+    type="required"
+    versionRange="[21.1,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.create_cir_addition]]
+    modId="minecraft"
+    type="required"
+    versionRange="[1.21.1,1.22)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.create_cir_addition]]
+    modId="create"
+    type="required"
+    versionRange="[6.0.0,7.0)"
+    ordering="AFTER"
+    side="BOTH"
+
+# AE2 是可选依赖：装了才启用量子桥数量限制，没装不影响本模组工作
+[[dependencies.create_cir_addition]]
+    modId="ae2"
+    type="optional"
+    versionRange="[19,)"
+    ordering="AFTER"
+    side="BOTH"

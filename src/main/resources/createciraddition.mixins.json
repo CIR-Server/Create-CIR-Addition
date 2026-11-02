@@ -1,0 +1,28 @@
+{
+    "required":  true,
+    "minVersion":  "0.8.5",
+    "package":  "com.cirserver.createciraddition.mixin",
+    "plugin":  "com.cirserver.createciraddition.mixin.CirMixinPlugin",
+    "refmap":  "createciraddition.refmap.json",
+    "compatibilityLevel":  "JAVA_21",
+    "mixins":  [
+                   "MixinMountedStorageManager",
+                   "MixinPackageEntity",
+                   "MixinSmartBlockEntity",
+                   "MixinLinkBehaviour",
+                   "MixinChainConveyorBlockEntity",
+                   "MixinBasinBlockEntity",
+                   "MixinFunnelBlockEntity",
+                   "MixinBeltBlockEntity",
+                   "MixinQuantumBridge"
+               ],
+    "client":  [
+
+               ],
+    "server":  [
+
+               ],
+    "injectors":  {
+                      "defaultRequire":  0
+                  }
+}
