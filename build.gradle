@@ -42,7 +42,9 @@ neoForge {
 // 依赖来源
 // ------------------------------------------------------------
 // Create 和 AE2 都不在 Maven Central 上，这里走 Modrinth 的 Maven 镜像。
-// 坐标格式是 maven.modrinth:<slug>:<version>，slug 是 Modrinth 上的项目短名。
+// 坐标格式是 maven.modrinth:<slug>:<version-id>。
+// 注意第三个参数是 Modrinth 的 version id（如 UjX6dr61），
+// 不是 version_number（如 6.0.10+mc1.21.1）——后者带 + 号，解析容易出岔子。
 // 如果哪天 Modrinth Maven 挂了，可以换成 CurseMaven：
 //   implementation "curse.maven:create-328085:5838779"
 // 具体 file id 在 CurseForge 项目的 Files 页面上能看到。
