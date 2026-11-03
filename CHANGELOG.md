@@ -2,6 +2,52 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [3.4.3] - 2026-11-03
+
+### 变更
+
+- **`/cir home` 权限要求降到 0**。查看基地坐标不再需要管理员，所有玩家都能用。设置基地（`/cir setHome`）仍然要求权限 4。
+
+## [3.4.2] - 2026-11-03
+
+### 修复
+
+- **发电机开关提示多了一个「已」**。`/cir ae2generator crystalresonance` 原本显示「水晶谐振发电机已已启用」——语言模板自带「已」，参数里又带了一个。现在参数改为「开启 / 关闭」。
+
+## [3.4.1] - 2026-11-03
+
+### 修复
+
+- **切换谐振仓档位对已放置的机器不生效**。配置本身写对了，但 AE2 的 `VibrationChamberBlockEntity` 在构造函数里把 `minEnergyRate` / `baseMaxEnergyRate` / `initialEnergyRate` 三个值读进了 `final` 字段，之后再也不看配置。表现是切到 `low` 档后发电量不变、耗煤速度变成 4 倍。
+
+  现在切档后会扫描已加载区域内的谐振仓，覆盖这三个缓存字段，并在聊天栏提示同步了几台。覆盖手段不可用时只记录一条警告，不影响其他功能。
+
+  未加载区块里的机器不需要处理：它们下次加载时会重新构造，自然读到新配置。
+
+## [3.4.0] - 2026-11-03
+
+### 新增
+
+- **AE2 发电机运行时调节**（`/cir ae2generator`，权限 4）
+
+  AE2 自带两个能给 ME 网络发电的方块，现在可以在游戏内调整，不需要改 `ae2-common.toml`，也不需要重启。
+
+  | 命令 | 作用 |
+  |---|---|
+  | `/cir ae2generator` | 查看当前状态 |
+  | `/cir ae2generator crystalresonance <true\|false>` | 开关水晶谐振发电机 |
+  | `/cir ae2generator vibrationchamber <low\|normal\|boost>` | 切换谐振仓档位 |
+
+  谐振仓三档以切档前的值为基准整体缩放：`low` 是 1/4，`normal` 是原值，`boost` 是 4 倍。基准会在第一次切档时快照进配置文件，所以手动调过 `ae2-common.toml` 的数值不会被冲成 AE2 出厂默认。
+
+  谐振仓无法归零 —— AE2 自身的下限是 `baseEnergyPerFuelTick ≥ 0.1`、`maxEnergyPerGameTick ≥ 1`，`low` 只是压到 1/4。
+
+### 技术细节
+
+- 反射访问 `AEConfig$CommonConfig` 的 public final 字段，调用 `ConfigValue.set()` + `save()` 写回 `ae2-common.toml`
+- AE2 未安装时指令返回「未检测到 AE2」，不抛异常
+- `CirConfig` 新增 6 个快照键（`ae2*Snapshot`），记录切档前的基准值
+
 ## [3.3.2] - 2026-11-02
 
 ### 变更
