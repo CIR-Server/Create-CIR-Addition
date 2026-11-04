@@ -10,14 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * 钩住 AE2 的量子桥状态更新，在结构刚成型时做数量判定。
  *
- * <p>目标类是 AE2 的 {@code QuantumBridgeBlockEntity}，这里用字符串写类名而不是
- * 直接 import，避免对 AE2 产生编译期依赖。真正的加载开关在
- * {@link CirMixinPlugin#shouldApplyMixin} 里按 AE2 是否安装决定。
- *
- * <p>挂钩的方法是 {@code updateStatus(QuantumCluster, byte, boolean)}——它是
- * {@code constructed} 字段唯一的写入点，也就是「成型 / 解散」的唯一状态变更处。
- * 注入方法刻意不接收原方法参数，只带 CallbackInfo，这样参数类型里就不会出现
- * AE2 的类。
+ * 目标类是 AE2 的 {@code QuantumBridgeBlockEntity}，这里用字符串写类名而不是
  */
 @Mixin(targets = "appeng.blockentity.qnb.QuantumBridgeBlockEntity", remap = false)
 public class MixinQuantumBridge {

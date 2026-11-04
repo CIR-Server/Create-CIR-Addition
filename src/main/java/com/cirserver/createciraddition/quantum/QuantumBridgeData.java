@@ -15,15 +15,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 /**
  * 每个维度一份的「已登记量子桥中心坐标」表。
  *
- * <p>用登记表而不是实时扫描区块，原因有两个：
- * <ul>
- *   <li>不会因为区块未加载而漏判（桥可能远在未加载区域）</li>
- *   <li>半径 4096 格等于 512×512 个区块，实时扫描完全不现实</li>
- * </ul>
- *
- * <p>表里的坐标在桥被拆掉后可能残留，由 {@link #purgeStale(ServerLevel)} 清理。
- * 清理时<b>只删已加载区块里确认消失的记录</b>——未加载的区块查出来是空气，
- * 照删会导致玩家一跑远配额就白送。
+ * 用登记表而不是实时扫描区块，原因有两个：
  */
 public class QuantumBridgeData extends SavedData {
 
@@ -62,12 +54,10 @@ public class QuantumBridgeData extends SavedData {
     }
 
     /**
-     * 这个坐标是否已经登记过。
-     *
-     * <p>用途：区块加载时 AE2 会重算集群、再次调用 {@code updateStatus}，
-     * 让 {@code isFormed()} 从 false 变 true，看起来像「刚刚成型」。
-     * 已经登记过的桥直接跳过判定，玩家每次走进量子环区域就不会再刷提示。
-     */
+ * 这个坐标是否已经登记过。
+ *
+ * 用途：区块加载时 AE2 会重算集群、再次调用 {@code updateStatus}，
+ */
     public boolean contains(BlockPos center) {
         return bridges.contains(center.immutable());
     }
@@ -92,11 +82,7 @@ public class QuantumBridgeData extends SavedData {
         }
     }
 
-    /**
-     * 清理已经不存在了的记录。
-     *
-     * @return 清掉的条数
-     */
+    /** 清理已经不存在了的记录。 */
     public int purgeStale(ServerLevel level) {
         int removed = 0;
         Iterator<BlockPos> it = bridges.iterator();

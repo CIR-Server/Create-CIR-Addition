@@ -14,32 +14,6 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * MSPT 负载预警（带复检）。
  *
  * <h2>为什么需要复检</h2>
- * Minecraft 的 tick 预算是 50 ms，{@code MSPT = 50} 就是满速 20 TPS。
- * 单次采样很容易被一次性开销（Sable 保存 sub-level、区块加载、玩家进服）抬高，
- * 那时候服务器其实完全正常，弹警报纯属噪音。
- *
- * <p>所以这里改成两阶段：
- * <ol>
- *   <li><b>第一次采样</b>（每 30 秒）——读到超过阈值就进入待验证状态，<b>不广播</b></li>
- *   <li><b>复检</b>（3 秒后）——如果第二次数值仍落在<b>同一档位或更高</b>，才按第二次的等级广播；
- *       否则静默，连日志都不写</li>
- * </ol>
- *
- * <p>效果是一次磁盘 IO、一次 GC 不会惊动任何人，只有持续性的负载才会报出来。
- *
- * <h2>档位</h2>
- * <pre>
- *   40 / 45 / 50 / 70  →  白 / 黄 / 金 / 红
- * </pre>
- * 注意 40–50 这三档都还在「每 tick 有余量」的范围内（50 才是刚好用满），
- * 它们的作用是提前告知趋势，不是说服务器已经卡了。真正需要处理的是 70 档。
- *
- * <h2>广播规则</h2>
- * <ul>
- *   <li>采样间隔固定 30 秒，复检的 3 秒包含在这个周期里</li>
- *   <li>红色档（≥70）在复检确认后每次都会广播，直到降下来</li>
- *   <li>红色档同时触发自动扫地（{@code cleanupOnHighMspt}）</li>
- * </ul>
  */
 @EventBusSubscriber(
    modid = "create_cir_addition",
@@ -151,11 +125,10 @@ public class MsptMonitor {
     }
 
     /**
-     * MSPT 进入红色档时自动扫地。
-     *
-     * <p>和警报同步：既然已经确认是持续性高负载，顺手把地上堆积的掉落物清掉，
-     * 实体过多是最常见的服务器卡顿来源之一。
-     */
+ * MSPT 进入红色档时自动扫地。
+ *
+ * 和警报同步：既然已经确认是持续性高负载，顺手把地上堆积的掉落物清掉，
+ */
     private static void autoCleanup(MinecraftServer server, float mspt) {
         try {
             if (!CirConfig.CLEANUP_ON_HIGH_MSPT.get()) {

@@ -9,14 +9,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * 被清理掉的掉落物暂存区。
  *
- * <p>从老版 Duolingo Super 移植。清理时收集到的物品不会凭空消失，
- * 而是进到这里，玩家可以在有效期内用 {@code /cir trashbin} 打开界面取回。
- *
- * <p>有效期固定 <b>1 小时</b>（{@link #DEFAULT_DURATION_SECONDS}）。过期后实例直接丢弃，
- * 界面也会自动关闭。
- *
- * <p>注意：这是<b>全局单例</b>——整个服务器共用一个垃圾桶，不是每人一份。
- * 和老版行为一致：谁先打开谁先拿。
+ * 从老版 Duolingo Super 移植。清理时收集到的物品不会凭空消失，
  */
 public class TrashBin {
 
@@ -74,12 +67,7 @@ public class TrashBin {
         return Collections.emptyList();
     }
 
-    /**
-     * 从垃圾桶取走一件物品。
-     *
-     * @param globalIndex 全局索引（跨页）
-     * @return 取走成功返回 true；背包满了或索引无效返回 false
-     */
+    /** 从垃圾桶取走一件物品。 */
     public boolean claimItem(int globalIndex, ServerPlayer player) {
         if (globalIndex < 0 || globalIndex >= this.items.size()) {
             return false;

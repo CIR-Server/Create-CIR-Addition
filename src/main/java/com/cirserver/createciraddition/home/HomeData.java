@@ -15,11 +15,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 /**
  * 全局唯一的「基地」坐标。
  *
- * <p>整个存档只有一处基地，不区分维度——基地记录里带着自己的维度，
- * 只有同维度、且在商圈内的量子桥才享受豁免。
- *
- * <p>存放位置是主世界（overworld）的 {@code dataStorage}，所以它是全局单例，
- * 不会因为维度不同而产生多份。
+ * 整个存档只有一处基地，不区分维度——基地记录里带着自己的维度，
  */
 public class HomeData extends SavedData {
 
@@ -81,11 +77,7 @@ public class HomeData extends SavedData {
         setDirty();
     }
 
-    /**
-     * 某坐标是否落在基地豁免范围内。
-     *
-     * @param radius 半径（格），只算水平距离
-     */
+    /** 某坐标是否落在基地豁免范围内。 */
     public boolean isInHomeZone(ServerLevel level, BlockPos pos, int radius) {
         if (!isInitialized()) return false;
         if (!level.dimension().location().equals(this.dimension)) return false;

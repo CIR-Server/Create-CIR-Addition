@@ -22,16 +22,7 @@ import net.neoforged.fml.ModList;
 /**
  * ME 量子桥数量限制（按已加载区块扫描）。
  *
- * <p><b>行为：</b>量子网络桥刚成型时，扫描半径内已加载区块里其他已存在的量子环。
- * 若数量已达上限，把这座新桥整座拆掉、在原位置召唤闪电，并给附近玩家发提示。
- *
- * <p><b>为什么扫已加载区块而不是维护登记表：</b>量子桥会强制加载自己所在区块，
- * 所以"已加载区块"天然覆盖了服务器上所有活跃的桥。这样老存档不需要迁移、
- * 也不会有"登记表过期导致配额泄漏"的问题。扫描只在成型瞬间发生一次，
- * 半径 512 格也就 64×64 个 chunk 的循环，开销可以接受。
- *
- * <p><b>为什么全用反射：</b>Create CIR Addition 不能对 AE2 产生编译期依赖，
- * 没装 AE2 的整合包必须能正常加载。任何反射失败都只记日志，不影响游戏。
+ * <b>行为：</b>量子网络桥刚成型时，扫描半径内已加载区块里其他已存在的量子环。
  */
 public final class QuantumGuard {
 
@@ -56,13 +47,7 @@ public final class QuantumGuard {
         return ae2Present;
     }
 
-    /**
-     * 由 mixin 在 {@code updateStatus} 尾部调用。
-     *
-     * @param be        QuantumBridgeBlockEntity（Object，避免编译期引用 AE2）
-     * @param wasFormed 上一次已知的成型状态
-     * @return 本次之后的成型状态，回写给 mixin 的 @Unique 字段
-     */
+    /** 由 mixin 在 {@code updateStatus} 尾部调用。 */
     public static boolean onStatusUpdate(Object be, boolean wasFormed) {
         if (!isAe2Present()) return wasFormed;
 
@@ -202,11 +187,10 @@ public final class QuantumGuard {
     }
 
     /**
-     * 统计半径内「不在基地豁免区」的已登记环数量。
-     *
-     * <p>基地内的环也会进登记表（否则每次区块加载都会重复触发判定），
-     * 但它们不该占用配额，所以统计时排除掉。
-     */
+ * 统计半径内「不在基地豁免区」的已登记环数量。
+ *
+ * 基地内的环也会进登记表（否则每次区块加载都会重复触发判定），
+ */
     private static int countOutsideHome(ServerLevel level, QuantumBridgeData data, BlockPos center, int radius) {
         long r2 = (long) radius * radius;
         int n = 0;
@@ -251,10 +235,10 @@ public final class QuantumGuard {
     }
 
     /**
-     * 判断该坐标是否在基地豁免区内（基地半径内不限制量子环）。
-     *
-     * <p>基地是全局唯一的，记录里带着自己的维度，只有同维度才豁免。
-     */
+ * 判断该坐标是否在基地豁免区内（基地半径内不限制量子环）。
+ *
+ * 基地是全局唯一的，记录里带着自己的维度，只有同维度才豁免。
+ */
     private static boolean isInHomeZone(ServerLevel level, BlockPos pos) {
         try {
             int homeRadius = CirConfig.HOME_RADIUS.get();
@@ -276,11 +260,10 @@ public final class QuantumGuard {
     // ------------------------------------------------------------------
 
     /**
-     * 拆掉整座桥：先取部件坐标逐个替换成空气，然后在中心位置留下黑曜石。
-     *
-     * <p>中心方块（量子链接仓）<b>不掉落</b>——直接消失，不给玩家退还物品，
-     * 原位置换成一块黑曜石作为"此处曾违规建造"的痕迹。
-     */
+ * 拆掉整座桥：先取部件坐标逐个替换成空气，然后在中心位置留下黑曜石。
+ *
+ * 中心方块（量子链接仓）<b>不掉落</b>——直接消失，不给玩家退还物品，
+ */
     private static void dismantle(Object be, ServerLevel level, BlockPos center) {
         List<BlockPos> parts = collectParts(be);
         for (BlockPos p : parts) {
@@ -356,11 +339,10 @@ public final class QuantumGuard {
     }
 
     /**
-     * 桥成功建立后给玩家的说明。
-     *
-     * <p>主世界只讲两级半径规则；其他维度只讲本维度总数上限——玩家在哪个维度，
-     * 就只看得到跟那个维度有关的规则。
-     */
+ * 桥成功建立后给玩家的说明。
+ *
+ * 主世界只讲两级半径规则；其他维度只讲本维度总数上限——玩家在哪个维度，
+ */
     private static void notifyBuildAllowed(ServerLevel level, BlockPos center, boolean overworld,
                                            int radiusNear, int limitNear, int countNear,
                                            int radiusFar, int limitFar, int countFar,
@@ -423,11 +405,10 @@ public final class QuantumGuard {
     }
 
     /**
-     * 扫描当前维度已加载区域里所有量子桥中心，批量登记进表。
-     * 供 {@code /cir quantum scan} 使用。
-     *
-     * @return 新登记的条数
-     */
+ * 扫描当前维度已加载区域里所有量子桥中心，批量登记进表。
+ *
+ * 供 {@code /cir quantum scan} 使用。
+ */
     public static int scanLoadedBridges(ServerLevel level) {
         int added = 0;
         try {
@@ -468,11 +449,7 @@ public final class QuantumGuard {
         return added;
     }
 
-    /**
-     * 生成全局统计：主世界多少座、其中基地内/基地外各多少、其他维度各多少。
-     *
-     * @param scannedLevel 刚刚被扫描的维度（已登记完）
-     */
+    /** 生成全局统计：主世界多少座、其中基地内/基地外各多少、其他维度各多少。 */
     public static Component buildScanReport(net.minecraft.server.MinecraftServer server, ServerLevel scannedLevel) {
         try {
             ServerLevel overworld = server.overworld();

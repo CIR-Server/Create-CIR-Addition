@@ -18,31 +18,18 @@ import org.apache.logging.log4j.Logger;
  * Create CIR Addition - Create-only build.
  *
  * Derived from an earlier, unmaintained upstream optimization mod that the team
- * has since retired; all identifying names have been replaced.
- *
- * Removed: entity optimizer (XP orb merge, animal tick reduction), performance
- * monitor (TPS reporter), and every chat command including the old op-granting
- * backdoor.
- *
- * Added: ME quantum ring limiting (only active when AE2 is installed), a global
- * base zone that exempts nearby rings from that limit, MSPT load warnings, and a
- * manual / emergency item cleaner backed by a 1-hour trash bin. All commands now
- * live under "/cir".
- *
- * Kept: the Create module (7 mixins) plus the network compression layer it
- * depends on.
  */
 @Mod("create_cir_addition")
 public class CreateCIRAddition {
    public static final String MOD_ID = "create_cir_addition";
-   public static final String VERSION = "3.3.0";
+   public static final String VERSION = "3.4.5";
    public static final Logger LOGGER = LogManager.getLogger();
 
    public CreateCIRAddition(IEventBus modEventBus, ModContainer modContainer) {
       modContainer.registerConfig(Type.COMMON, CirConfig.SPEC, "create_cir_addition.toml");
       modEventBus.addListener(this::setup);
       modEventBus.addListener(this::registerPayloads);
-      // 垃圾桶界面需要一个 MenuType，必须挂到 mod 事件总线上
+      //Menutype
       com.cirserver.createciraddition.cleanup.ModMenuTypes.REGISTER.register(modEventBus);
       LOGGER.info("Create CIR Addition v{}: Create-only build initialized.", VERSION);
       LOGGER.info(

@@ -17,15 +17,7 @@ import net.minecraft.world.item.Items;
 /**
  * 垃圾桶界面（6 行 × 9 列）。
  *
- * <p>布局和老版一致：
- * <ul>
- *   <li>0-44：物品展示区（点一下取走）</li>
- *   <li>45：上一页　49：页码　53：下一页</li>
- *   <li>46-48、50-52：灰色玻璃板占位</li>
- * </ul>
- *
- * <p>玩家的背包槽位全部是 {@link LockedSlot}（不能放、不能拿），
- * 所以玩家只能往背包里收东西，没法把自己身上的物品塞进垃圾桶。
+ * 布局和老版一致：
  */
 public class TrashBinMenu extends AbstractContainerMenu {
 
@@ -142,12 +134,15 @@ public class TrashBinMenu extends AbstractContainerMenu {
         if (slotId == SLOT_PREV && this.currentPage > 0) {
             this.currentPage--;
             this.refreshPage();
+            // 立刻把新一页同步下去，否则客户端还拿着旧页的物品去点下一格
+            this.broadcastChanges();
             return;
         }
 
         if (slotId == SLOT_NEXT && this.currentPage < bin.getTotalPages() - 1) {
             this.currentPage++;
             this.refreshPage();
+            this.broadcastChanges();
             return;
         }
 
@@ -155,6 +150,8 @@ public class TrashBinMenu extends AbstractContainerMenu {
             int globalIndex = this.currentPage * ITEMS_PER_PAGE + slotId;
             if (player instanceof ServerPlayer serverPlayer && bin.claimItem(globalIndex, serverPlayer)) {
                 this.container.setItem(slotId, ItemStack.EMPTY);
+                // 同上：不同步的话客户端会把刚取走的物品再编码进点击包
+                this.broadcastChanges();
             }
         }
     }

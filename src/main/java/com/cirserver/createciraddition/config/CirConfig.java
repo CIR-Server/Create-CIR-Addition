@@ -104,6 +104,36 @@ public class CirConfig {
          "with a half-registered ring table."
       )
       .define("quantumLimiterEnabled", true);
+   // ---- AE2 发电机运行时调节（仅当 AE2 已安装时生效）----
+   // 下面 6 个键只是给 /cir ae2generator 用的快照存储，玩家不需要手动改。
+   // 之所以要存快照：档位是相对“切档之前的值”算的，而不是相对 AE2 的出厂默认值，
+   // 这样服主自己调过 ae2-common.toml 之后切档不会把他的手调数值冲掉。
+   public static final BooleanValue AE2_RESONANCE_SNAPSHOT_VALID = BUILDER.comment(
+         "Internal. Whether ae2ResonanceRateSnapshot holds a real captured value.",
+         "Written automatically by /cir ae2generator crystalresonance false. Do not edit by hand."
+      )
+      .define("ae2ResonanceSnapshotValid", false);
+   public static final DoubleValue AE2_RESONANCE_RATE_SNAPSHOT = BUILDER.comment(
+         "Internal. AE2 crystalResonanceGeneratorRate captured before the generator was switched off."
+      )
+      .defineInRange("ae2ResonanceRateSnapshot", 20.0, 0.0, 1000000.0);
+   public static final BooleanValue AE2_VIBRATION_SNAPSHOT_VALID = BUILDER.comment(
+         "Internal. Whether the ae2Vibration*Snapshot entries hold a real captured value.",
+         "Written automatically by /cir ae2generator vibrationchamber low|boost. Do not edit by hand."
+      )
+      .define("ae2VibrationSnapshotValid", false);
+   public static final DoubleValue AE2_VIBRATION_BASE_SNAPSHOT = BUILDER.comment(
+         "Internal. AE2 vibrationChamber.baseEnergyPerFuelTick captured on the first tier change."
+      )
+      .defineInRange("ae2VibrationBaseSnapshot", 5.0, 0.1, 1000.0);
+   public static final IntValue AE2_VIBRATION_MIN_SNAPSHOT = BUILDER.comment(
+         "Internal. AE2 vibrationChamber.minEnergyPerGameTick captured on the first tier change."
+      )
+      .defineInRange("ae2VibrationMinSnapshot", 4, 0, 1000);
+   public static final IntValue AE2_VIBRATION_MAX_SNAPSHOT = BUILDER.comment(
+         "Internal. AE2 vibrationChamber.baseMaxEnergyPerGameTick captured on the first tier change."
+      )
+      .defineInRange("ae2VibrationMaxSnapshot", 40, 1, 1000);
    public static final ModConfigSpec SPEC = BUILDER.build();
 
    /** 配置文件对象，onLoad 时拿到，用于让 /cir 指令写回磁盘 */
@@ -121,11 +151,10 @@ public class CirConfig {
    }
 
    /**
-    * 把 {@code redstoneLinkOptimization} 的值写回配置文件。
-    *
-    * <p>NeoForge 的 {@link ModConfig} 没有 save()，所以直接用 {@code getFullPath()}
-    * 拿到文件路径后改写对应那一行。只动这一个键，其余内容保持原样。
-    */
+ * 把 {@code redstoneLinkOptimization} 的值写回配置文件。
+ *
+ * NeoForge 的 {@link ModConfig} 没有 save()，所以直接用 {@code getFullPath()}
+ */
    public static void save() {
       try {
          if (config == null) {
@@ -151,10 +180,25 @@ public class CirConfig {
    }
 
    /**
-    * 红石终端优化是否开启。
-    *
-    * <p>mixin 里调用，配置尚未加载时按关闭处理——宁可少优化，不要抛异常。
-    */
+ * 用 NeoForge 自己的 {@link ModConfigSpec#save()} 把整份配置写盘。
+ *
+ * 和上面 {@link #save()} 的区别：那个是直接改文本行、只能应付一个键；
+ */
+   public static void saveSpec() {
+      try {
+         if (SPEC.isLoaded()) {
+            SPEC.save();
+         }
+      } catch (Throwable t) {
+         CreateCIRAddition.LOGGER.warn("Create CIR Addition: Failed to save config spec", t);
+      }
+   }
+
+   /**
+ * 红石终端优化是否开启。
+ *
+ * mixin 里调用，配置尚未加载时按关闭处理——宁可少优化，不要抛异常。
+ */
    public static boolean isRedstoneLinkOptimizationEnabled() {
       try {
          return REDSTONE_LINK_OPTIMIZATION.get();

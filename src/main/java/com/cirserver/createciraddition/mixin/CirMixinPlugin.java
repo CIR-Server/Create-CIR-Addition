@@ -9,12 +9,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 /**
  * Mixin 加载门控。
  *
- * <p>核心作用：**只有在 AE2 已安装时才加载 {@link MixinQuantumBridge}**。
- * 没装 AE2 的整合包里，这个 mixin 目标类不存在，不门控的话启动会直接报
- * 「target class not found」并崩服。
- *
- * <p>其余 Create 相关的 mixin 是必需的（mods.toml 里 Create 是 required 依赖），
- * 一律放行。
+ * 核心作用：**只有在 AE2 已安装时才加载 {@link MixinQuantumBridge}**。
  */
 public class CirMixinPlugin implements IMixinConfigPlugin {
 
@@ -42,12 +37,10 @@ public class CirMixinPlugin implements IMixinConfigPlugin {
     }
 
     /**
-     * mixin 阶段的 mod 存在性检测。
-     *
-     * <p>{@code ModList} 在这个阶段还没准备好，用它判断会永远得到 false，
-     * 导致依赖它的 mixin 被静默跳过。这里用 {@code LoadingModList}，
-     * 失败时再用类加载兜底。
-     */
+ * mixin 阶段的 mod 存在性检测。
+ *
+ * {@code ModList} 在这个阶段还没准备好，用它判断会永远得到 false，
+ */
     private static boolean isModPresentEarly(String modId) {
         try {
             Object modFile = net.neoforged.fml.loading.LoadingModList.get().getModFileById(modId);

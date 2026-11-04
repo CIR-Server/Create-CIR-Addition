@@ -9,8 +9,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 /**
  * 本模组用到的菜单类型。
  *
- * <p>注册表要在主类的构造函数里 {@code ModMenuTypes.REGISTER.register(modEventBus)}
- * 挂到 mod 事件总线上，否则打开垃圾桶界面时会找不到 menu type。
+ * 注册表要在主类的构造函数里 {@code ModMenuTypes.REGISTER.register(modEventBus)}
  */
 public class ModMenuTypes {
 

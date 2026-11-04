@@ -2,9 +2,11 @@ package com.cirserver.createciraddition.cleanup;
 
 import com.cirserver.createciraddition.CreateCIRAddition;
 import com.cirserver.createciraddition.config.CirConfig;
+import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -20,17 +22,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * 地面掉落物清理（扫地）。
  *
- * <p>从老版 Duolingo Super 的 {@code CleanupScheduler} 移植，改动：
- * <ul>
- *   <li><b>取消定时自动清理</b>——没有倒计时广播、没有 interval 配置</li>
- *   <li>被清理的物品存进 {@link TrashBin}（有效期 1 小时），玩家可用 {@code /cir trashbin} 取回</li>
- * </ul>
- *
- * <p>触发方式只有两种：
- * <ol>
- *   <li>服务器 MSPT ≥ 50（红色档）时由 {@code MsptMonitor} 自动调用</li>
- *   <li>管理员手动执行 {@code /cir cleanup}</li>
- * </ol>
+ * 从老版 Duolingo Super 的 {@code CleanupScheduler} 移植，改动：
  */
 public final class ItemCleaner {
 
@@ -38,11 +30,24 @@ public final class ItemCleaner {
     }
 
     /**
-     * 清理所有维度的地面掉落物，并把它们存进垃圾桶。
-     *
-     * @param ignoreNamed 是否跳过带自定义名称的物品（命名物品保护）
-     * @return 实际清理的掉落物实体数量
-     */
+ * 这个物品能不能安全地经网络发给客户端。
+ *
+ * 垃圾桶里的东西是要显示在界面上的。如果某个 ItemStack 的数据组件没法序列化，
+ */
+    private static boolean isNetworkSafe(ItemStack stack, net.minecraft.core.RegistryAccess registries) {
+        net.minecraft.network.RegistryFriendlyByteBuf buf =
+            new net.minecraft.network.RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
+        try {
+            ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, stack);
+            return true;
+        } catch (Throwable t) {
+            return false;
+        } finally {
+            buf.release();
+        }
+    }
+
+    /** 清理所有维度的地面掉落物，并把它们存进垃圾桶。 */
     public static int cleanup(MinecraftServer server, boolean ignoreNamed) {
         List<ItemStack> collected = new ArrayList<>();
         int removed = 0;
@@ -55,8 +60,17 @@ public final class ItemCleaner {
                     if (ignoreNamed && itemEntity.hasCustomName()) continue;
                     ItemStack stack = itemEntity.getItem();
                     if (stack.isEmpty()) continue;
-                    collected.add(stack.copy());
+                    // 无论能否进桶都得清掉，所以先登记，再决定要不要收进收集表
                     toRemove.add(itemEntity);
+                    if (!isNetworkSafe(stack, server.registryAccess())) {
+                        // 这种物品一旦进垃圾桶，客户端点它就会在 container_click 里编码失败并断连
+                        CreateCIRAddition.LOGGER.warn(
+                            "Create CIR Addition: destroyed an unencodable item {} x{} at {} (it would disconnect clients from the trash bin)",
+                            stack.getItem(), stack.getCount(), itemEntity.blockPosition()
+                        );
+                        continue;
+                    }
+                    collected.add(stack.copy());
                 }
             } catch (Throwable t) {
                 CreateCIRAddition.LOGGER.debug(

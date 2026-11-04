@@ -2,6 +2,7 @@ package com.cirserver.createciraddition.home;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.cirserver.createciraddition.CreateCIRAddition;
 import com.cirserver.createciraddition.config.CirConfig;
 import net.minecraft.commands.Commands;
@@ -17,10 +18,7 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 /**
  * 基地系统的初始化与命令注册。
  *
- * <p>首次进入新地图时自动把出生点设为基地；之后要改位置用
- * {@code /cir setHome <x> <y> <z>}。
- *
- * <p>基地在任何时候都会初始化（不依赖 AE2），但只有 AE2 装了才会被量子环逻辑用到。
+ * 首次进入新地图时自动把出生点设为基地；之后要改位置用
  */
 @EventBusSubscriber(
    modid = "create_cir_addition",
@@ -68,9 +66,9 @@ public class HomeEvents {
                         )
                     )
                 )
-                // /cir home —— 查看当前基地（4 级）
+                // /cir home —— 查看当前基地（所有玩家可用，0 级）
                 .then(Commands.literal("home")
-                    .requires(source -> source.hasPermission(4))
+                    .requires(source -> source.hasPermission(0))
                     .executes(ctx -> {
                         MinecraftServer server = ctx.getSource().getServer();
                         HomeData data = HomeData.get(server);
@@ -197,7 +195,167 @@ public class HomeEvents {
                         })
                     )
                 )
+                // /cir ae2generator [crystalresonance <true|false> | vibrationchamber <low|normal|boost>]
+                // AE2 两个自发电方块的运行时调节（4 级）。改的是 AE2 自己的 ModConfigSpec，立即生效并写盘。
+                .then(Commands.literal("ae2generator")
+                    .requires(source -> source.hasPermission(4))
+                    .executes(ctx -> reportAe2Generators(ctx.getSource()))
+                    .then(Commands.literal("crystalresonance")
+                        .then(Commands.argument("enabled", BoolArgumentType.bool())
+                            .executes(ctx -> {
+                                boolean enabled = BoolArgumentType.getBool(ctx, "enabled");
+                                var source = ctx.getSource();
+
+                                if (!com.cirserver.createciraddition.ae2.Ae2GeneratorControl.isAvailable()) {
+                                    source.sendFailure(Component.translatable("cir.ae2gen.unavailable"));
+                                    return 0;
+                                }
+                                if (!com.cirserver.createciraddition.ae2.Ae2GeneratorControl
+                                    .setCrystalGeneratorEnabled(enabled)) {
+                                    source.sendFailure(Component.translatable("cir.ae2gen.reflect_failed"));
+                                    return 0;
+                                }
+
+                                double rate = com.cirserver.createciraddition.ae2.Ae2GeneratorControl
+                                    .crystalGeneratorRate();
+                                source.sendSuccess(
+                                    () -> Component.translatable(
+                                        "cir.ae2gen.crystal.toggled",
+                                        Component.translatable(enabled ? "cir.state.on" : "cir.state.off"),
+                                        formatAeNumber(rate)
+                                    ),
+                                    true
+                                );
+                                return 1;
+                            })
+                        )
+                    )
+                    .then(Commands.literal("vibrationchamber")
+                        .then(Commands.argument("tier", StringArgumentType.word())
+                            .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider
+                                .suggest(java.util.List.of("low", "normal", "boost"), builder))
+                            .executes(ctx -> {
+                                String raw = StringArgumentType.getString(ctx, "tier");
+                                var source = ctx.getSource();
+                                var tier = parseVibrationTier(raw);
+
+                                if (tier == null) {
+                                    source.sendFailure(Component.translatable("cir.ae2gen.bad_tier", raw));
+                                    return 0;
+                                }
+                                if (!com.cirserver.createciraddition.ae2.Ae2GeneratorControl.isAvailable()) {
+                                    source.sendFailure(Component.translatable("cir.ae2gen.unavailable"));
+                                    return 0;
+                                }
+                                int refreshed = com.cirserver.createciraddition.ae2.Ae2GeneratorControl
+                                    .setVibrationTier(tier, source.getServer());
+                                if (refreshed < 0) {
+                                    source.sendFailure(Component.translatable("cir.ae2gen.reflect_failed"));
+                                    return 0;
+                                }
+
+                                double[] values = com.cirserver.createciraddition.ae2.Ae2GeneratorControl
+                                    .currentVibrationValues();
+                                String base = values.length >= 3 ? formatAeNumber(values[0]) : "?";
+                                String low = values.length >= 3 ? formatAeNumber(values[1]) : "?";
+                                String high = values.length >= 3 ? formatAeNumber(values[2]) : "?";
+                                source.sendSuccess(
+                                    () -> Component.translatable(
+                                        "cir.ae2gen.vibration.set",
+                                        Component.translatable(tierTranslationKey(tier)),
+                                        base,
+                                        low,
+                                        high
+                                    ),
+                                    true
+                                );
+                                if (refreshed > 0) {
+                                    source.sendSuccess(
+                                        () -> Component.translatable("cir.ae2gen.refreshed", refreshed),
+                                        false
+                                    );
+                                }
+                                return 1;
+                            })
+                        )
+                    )
+                )
         );
+    }
+
+    /** /cir ae2generator —— 打印两个发电方块的当前状态 */
+    private static int reportAe2Generators(net.minecraft.commands.CommandSourceStack source) {
+        if (!com.cirserver.createciraddition.ae2.Ae2GeneratorControl.isAvailable()) {
+            source.sendFailure(Component.translatable("cir.ae2gen.unavailable"));
+            return 0;
+        }
+
+        boolean off = com.cirserver.createciraddition.ae2.Ae2GeneratorControl.isCrystalGeneratorOff();
+        double rate = com.cirserver.createciraddition.ae2.Ae2GeneratorControl.crystalGeneratorRate();
+        double[] values = com.cirserver.createciraddition.ae2.Ae2GeneratorControl.currentVibrationValues();
+        var tier = com.cirserver.createciraddition.ae2.Ae2GeneratorControl.currentVibrationTier();
+
+        source.sendSuccess(
+            () -> Component.translatable("cir.ae2gen.status.title")
+                .withStyle(net.minecraft.ChatFormatting.GOLD),
+            false
+        );
+        source.sendSuccess(
+            () -> Component.translatable(
+                "cir.ae2gen.status.crystal",
+                Component.translatable(off ? "cir.state.off" : "cir.state.on")
+                    .withStyle(off ? net.minecraft.ChatFormatting.RED : net.minecraft.ChatFormatting.GREEN),
+                formatAeNumber(rate)
+            ),
+            false
+        );
+        source.sendSuccess(
+            () -> Component.translatable(
+                "cir.ae2gen.status.vibration",
+                Component.translatable(tierTranslationKey(tier)),
+                values.length >= 3 ? formatAeNumber(values[0]) : "?",
+                values.length >= 3 ? formatAeNumber(values[1]) : "?",
+                values.length >= 3 ? formatAeNumber(values[2]) : "?"
+            ),
+            false
+        );
+        return 1;
+    }
+
+    private static com.cirserver.createciraddition.ae2.Ae2GeneratorControl.VibrationTier parseVibrationTier(
+        String raw
+    ) {
+        if (raw == null) {
+            return null;
+        }
+        return switch (raw.toLowerCase(java.util.Locale.ROOT)) {
+            case "low" -> com.cirserver.createciraddition.ae2.Ae2GeneratorControl.VibrationTier.LOW;
+            case "normal" -> com.cirserver.createciraddition.ae2.Ae2GeneratorControl.VibrationTier.NORMAL;
+            case "boost" -> com.cirserver.createciraddition.ae2.Ae2GeneratorControl.VibrationTier.BOOST;
+            default -> null;
+        };
+    }
+
+    private static String tierTranslationKey(
+        com.cirserver.createciraddition.ae2.Ae2GeneratorControl.VibrationTier tier
+    ) {
+        return switch (tier) {
+            case LOW -> "cir.ae2gen.tier.low";
+            case NORMAL -> "cir.ae2gen.tier.normal";
+            case BOOST -> "cir.ae2gen.tier.boost";
+            case CUSTOM -> "cir.ae2gen.tier.custom";
+        };
+    }
+
+    /** 5.0 -> "5"，1.25 -> "1.25"；固定 ROOT locale，避免某些区域把小数点点成逗号 */
+    private static String formatAeNumber(double value) {
+        if (Double.isNaN(value)) {
+            return "?";
+        }
+        if (value == Math.rint(value) && Math.abs(value) < 1.0E15D) {
+            return String.valueOf((long) value);
+        }
+        return String.format(java.util.Locale.ROOT, "%.2f", value);
     }
 
     private static int setHome(MinecraftServer server, int x, int y, int z,

@@ -10,9 +10,7 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 /**
  * 客户端注册。
  *
- * <p>整个类用 {@code value = Dist.CLIENT} 限定，服务端根本不会加载它——
- * 类里引用了 {@code AbstractContainerScreen} 这些纯客户端类，不小心在服务端
- * 加载就会直接 NoClassDefFoundError。
+ * 整个类用 {@code value = Dist.CLIENT} 限定，服务端根本不会加载它——
  */
 @EventBusSubscriber(
     modid = CreateCIRAddition.MOD_ID,
