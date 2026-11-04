@@ -54,44 +54,74 @@ public final class ItemCleaner {
         }
     }
 
+    /** 原版全部 17 种潜影盒。逐个列出，不用后缀通配。 */
+    private static final java.util.Set<net.minecraft.resources.ResourceLocation> SHULKER_BOXES =
+        java.util.Set.of(
+            net.minecraft.resources.ResourceLocation.parse("minecraft:shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:white_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:orange_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:magenta_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:light_blue_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:yellow_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:lime_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:pink_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:gray_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:light_gray_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:cyan_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:purple_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:blue_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:brown_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:green_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:red_shulker_box"),
+            net.minecraft.resources.ResourceLocation.parse("minecraft:black_shulker_box")
+        );
     /**
      * //为避免垃圾桶bug，下列物品不清扫
+     *
+     * <p>判定顺序：
+     * <ol>
+     *   <li>可堆叠的：只排除旗帜，其余一律清理</li>
+     *   <li>不可堆叠的：潜影盒 / Create 工具箱 → 跳过</li>
+     *   <li>再查附魔 → 跳过</li>
+     *   <li>都不符合 → 清理</li>
+     * </ol>
+     *
+     * <p>注意：has() 对默认值不为 null 的组件恒为 true（ENCHANTMENTS 这类默认是空实例），
+     * 所以下面都按「内容是否为空」判断，不能用 has()。
      */
-    private static boolean shouldSkip(ItemStack stack) {
-        // 所有旗帜：图案来自静态注册表，两端可能不一致
+    private static String skipReason(ItemStack stack) {
+        // 旗帜：不分堆叠与否，一律跳过
         if (stack.getItem() instanceof net.minecraft.world.item.BannerItem) {
-            return true;
+            return "banner";
         }
-        if (stack.has(net.minecraft.core.component.DataComponents.BANNER_PATTERNS)) {
-            return true;
+        if (!stack.getOrDefault(
+                net.minecraft.core.component.DataComponents.BANNER_PATTERNS,
+                net.minecraft.world.level.block.entity.BannerPatternLayers.EMPTY
+            ).layers().isEmpty()) {
+            return "banner_patterns";
         }
-        // 潜影盒、Create 工具箱这类：内部物品表随物品走
-        if (stack.has(net.minecraft.core.component.DataComponents.CONTAINER)) {
-            return true;
+
+        // 可堆叠的普通物品：直接清理
+        if (stack.getMaxStackSize() > 1) {
+            return null;
         }
-        // 其它方块实体数据，比如带刷怪蛋内容的刷怪笼
-        if (stack.has(net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA)) {
-            return true;
-        }
-        // Create 工具箱：内部物品走自己的组件，不是标准 CONTAINER
-        if (hasCreateToolboxInventory(stack)) {
-            return true;
+
+        // 以下只针对不可堆叠的物品，按物品 ID 判断（箱子里有没有东西都不影响 ID）
+        net.minecraft.resources.ResourceLocation itemId =
+            net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
+
+        // 潜影盒：逐个列 ID，不用后缀通配，避免误伤或漏判
+        if (SHULKER_BOXES.contains(itemId)) {
+            return "shulker_box";
         }
         // 带附魔的：数据包重载后旧附魔引用会失效，客户端编码时找不到 id
-        if (stack.has(net.minecraft.core.component.DataComponents.ENCHANTMENTS)) {
-            return true;
+        if (!stack.getOrDefault(
+                net.minecraft.core.component.DataComponents.ENCHANTMENTS,
+                net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY
+            ).isEmpty()) {
+            return "enchanted";
         }
-        return false;
-    }
-
-    /** Create 的 toolbox_inventory 组件。按 ID 查，避免对 Create 产生编译期依赖。 */
-    private static final net.minecraft.resources.ResourceLocation TOOLBOX_INVENTORY =
-        net.minecraft.resources.ResourceLocation.parse("create:toolbox_inventory");
-
-    private static boolean hasCreateToolboxInventory(ItemStack stack) {
-        net.minecraft.core.component.DataComponentType<?> type =
-            net.minecraft.core.registries.BuiltInRegistries.DATA_COMPONENT_TYPE.get(TOOLBOX_INVENTORY);
-        return type != null && stack.has(type);
+        return null;
     }
 
     /** 清理所有维度的地面掉落物，并把它们存进垃圾桶。 */
@@ -109,8 +139,14 @@ public final class ItemCleaner {
                     ItemStack stack = itemEntity.getItem();
                     if (stack.isEmpty()) continue;
                     // 旗帜和带方块实体数据的物品完全不碰，留在原地
-                    if (shouldSkip(stack)) {
+                    String reason = skipReason(stack);
+                    if (reason != null) {
                         skipped++;
+                        if (skipped <= 5) {
+                            CreateCIRAddition.LOGGER.info(
+                                "Create CIR Addition: skip {} ({})", stack.getItem(), reason
+                            );
+                        }
                         continue;
                     }
                     // 之后能进桶的，先登记删除，再决定要不要收进收集表
@@ -225,6 +261,28 @@ public final class ItemCleaner {
             player.sendSystemMessage(msg);
         } catch (Throwable t) {
             CreateCIRAddition.LOGGER.debug("Create CIR Addition: failed to send cleanup result", t);
+        }
+    }
+
+    /**
+     * 手动清理后的全服广播：无论清到几个都带上「打开垃圾桶」按钮。
+     *
+     * <p>桶里有东西时按钮可点；桶空时按钮会提示已过期，同样能点。
+     */
+    public static void broadcastManual(MinecraftServer server, int count) {
+        try {
+            MutableComponent msg;
+            if (count > 0) {
+                msg = Component.translatable("cir.cleanup.done", count).withStyle(ChatFormatting.GREEN);
+            } else {
+                msg = Component.translatable("cir.cleanup.none").withStyle(ChatFormatting.GREEN);
+            }
+            msg.append(" ").append(trashBinButton());
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                player.sendSystemMessage(msg);
+            }
+        } catch (Throwable t) {
+            CreateCIRAddition.LOGGER.debug("Create CIR Addition: failed to broadcast cleanup", t);
         }
     }
 

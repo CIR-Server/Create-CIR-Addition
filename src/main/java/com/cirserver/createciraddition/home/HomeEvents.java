@@ -33,7 +33,7 @@ public class HomeEvents {
     /** 强制清扫倒计时剩余 tick，-1 表示没有进行中的倒计时 */
     private static int forceClearTicks = -1;
 
-    /** 倒计时播报的时间点（秒），第一个由 startForceCleanup 直接发 */
+    /** 倒计时播报的时间点（秒） */
     private static final int[] FORCE_CLEAR_MARKS = {10, 5, 3, 2, 1};
 
     private static void startForceCleanup(MinecraftServer server) {
@@ -64,6 +64,16 @@ public class HomeEvents {
         if (forceClearTicks <= 0) {
             forceClearTicks = -1;
             com.cirserver.createciraddition.cleanup.ItemCleaner.forceCleanup(server);
+            broadcastForceClearDone(server);
+        }
+    }
+
+    /** 强制清扫结束提示：红色加粗，全服广播 */
+    private static void broadcastForceClearDone(MinecraftServer server) {
+        MutableComponent message = Component.translatable("cir.forceclear.done")
+            .withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            player.sendSystemMessage(message);
         }
     }
 
@@ -175,20 +185,11 @@ public class HomeEvents {
                 .then(Commands.literal("cleanup")
                     .requires(source -> source.hasPermission(4))
                     .executes(ctx -> {
-                        var source = ctx.getSource();
-                        var server = source.getServer();
+                        var server = ctx.getSource().getServer();
                         int cleaned = com.cirserver.createciraddition.cleanup.ItemCleaner.cleanup(server);
-
-                        var player = source.getPlayer();
-                        if (player != null) {
-                            com.cirserver.createciraddition.cleanup.ItemCleaner.notifyManual(player, cleaned);
-                        } else {
-                            source.sendSuccess(
-                                () -> Component.translatable("cir.cleanup.done", cleaned),
-                                true
-                            );
-                        }
-                        return 1;
+                        // 全服广播，带「打开垃圾桶」按钮；清到 0 个也发
+                        com.cirserver.createciraddition.cleanup.ItemCleaner.broadcastManual(server, cleaned);
+                        return cleaned;
                     })
                 )
                 // /cir forcecleanup —— 强制清扫（4 级）：全服倒计时后清空地面，不进垃圾桶
@@ -196,10 +197,6 @@ public class HomeEvents {
                     .requires(source -> source.hasPermission(4))
                     .executes(ctx -> {
                         startForceCleanup(ctx.getSource().getServer());
-                        ctx.getSource().sendSuccess(
-                            () -> Component.translatable("cir.forceclear.started"),
-                            false
-                        );
                         return 1;
                     })
                 )
