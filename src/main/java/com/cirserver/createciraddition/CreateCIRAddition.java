@@ -18,6 +18,18 @@ import org.apache.logging.log4j.Logger;
  * Create CIR Addition - Create-only build.
  *
  * Derived from an earlier, unmaintained upstream optimization mod that the team
+ * has since retired; all identifying names have been replaced.
+ *
+ * Removed: entity optimizer, performance
+ * monitor, and most chat commands.
+ *
+ * Added: ME quantum ring limiting (only active when AE2 is installed), a global
+ * base zone that exempts nearby rings from that limit, MSPT load warnings, and a
+ * manual / emergency item cleaner backed by a 1-hour trash bin. All commands now
+ * live under "/cir".
+ *
+ * Kept: the Create module (7 mixins) plus the network compression layer it
+ * depends on.
  */
 @Mod("create_cir_addition")
 public class CreateCIRAddition {

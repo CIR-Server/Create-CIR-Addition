@@ -5,15 +5,19 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.cirserver.createciraddition.CreateCIRAddition;
 import com.cirserver.createciraddition.config.CirConfig;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * 基地系统的初始化与命令注册。
@@ -25,6 +29,55 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
    bus = EventBusSubscriber.Bus.GAME
 )
 public class HomeEvents {
+
+    /** 强制清扫倒计时剩余 tick，-1 表示没有进行中的倒计时 */
+    private static int forceClearTicks = -1;
+
+    /** 倒计时播报的时间点（秒），第一个由 startForceCleanup 直接发 */
+    private static final int[] FORCE_CLEAR_MARKS = {10, 5, 3, 2, 1};
+
+    private static void startForceCleanup(MinecraftServer server) {
+        if (forceClearTicks >= 0) {
+            return;
+        }
+        forceClearTicks = 20 * 20;
+        broadcastForceClear(server, 20);
+    }
+
+    /** 驱动强制清扫倒计时 */
+    @SubscribeEvent
+    public static void onServerTick(ServerTickEvent.Post event) {
+        if (forceClearTicks < 0) {
+            return;
+        }
+        MinecraftServer server = event.getServer();
+        forceClearTicks--;
+        if (forceClearTicks % 20 == 0) {
+            int secondsLeft = forceClearTicks / 20;
+            for (int mark : FORCE_CLEAR_MARKS) {
+                if (mark == secondsLeft) {
+                    broadcastForceClear(server, secondsLeft);
+                    break;
+                }
+            }
+        }
+        if (forceClearTicks <= 0) {
+            forceClearTicks = -1;
+            com.cirserver.createciraddition.cleanup.ItemCleaner.forceCleanup(server);
+        }
+    }
+
+    private static void broadcastForceClear(MinecraftServer server, int seconds) {
+        MutableComponent message = Component.translatable("cir.forceclear.before")
+            .withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)
+            .append(Component.literal(String.valueOf(seconds)).withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
+            .append(Component.translatable("cir.forceclear.after").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
+            .append(Component.translatable("cir.forceclear.warn").withStyle(ChatFormatting.RED, ChatFormatting.BOLD))
+            .append(Component.translatable("cir.forceclear.end").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD));
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            player.sendSystemMessage(message);
+        }
+    }
 
     /** 服务器启动完成：固化量子环总开关，并在基地未初始化时用出生点补上 */
     @SubscribeEvent
@@ -135,6 +188,18 @@ public class HomeEvents {
                                 true
                             );
                         }
+                        return 1;
+                    })
+                )
+                // /cir forcecleanup —— 强制清扫（4 级）：全服倒计时后清空地面，不进垃圾桶
+                .then(Commands.literal("forcecleanup")
+                    .requires(source -> source.hasPermission(4))
+                    .executes(ctx -> {
+                        startForceCleanup(ctx.getSource().getServer());
+                        ctx.getSource().sendSuccess(
+                            () -> Component.translatable("cir.forceclear.started"),
+                            false
+                        );
                         return 1;
                     })
                 )

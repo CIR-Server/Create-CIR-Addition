@@ -47,13 +47,13 @@ Create CIR Addition 是一个针对机械动力综合服务器的服务端附属
 
 Create 的 `RedstoneLinkNetworkHandler.updateNetworkOf` 每次被调用都要遍历整个同频率网络，对每个节点做 4 次状态查询。终端一多、或者区块反复加载，就是 O(n²) 的开销。
 
-**这个优化不会影响信号实时性** —— 信号值 `getTransmittedStrength()` 依然是实时读取，缓存的只是「这个节点还活不活着」。最坏情况是同一 tick 内被拆掉的终端晚 1 tick 才被移出网络。
+**这个优化不会影响信号实时性** —— 信号值 `getTransmittedStrength()` 依然是实时读取，缓存的只是「这个节点是否存活」。最坏情况是同一 tick 内被拆掉的终端晚 1 tick 才被移出网络。
 
 可用 `/cir redstonelinkoptimization true|false` 热切换。
 
 ### 网络压缩
 
-客户端与服务端之间的 Create 同步包会按大小自动选择 LZ4 或 Zstd 压缩，小包直接放行避免压缩反而变大。
+客户端与服务端之间的 Create 同步包会按大小自动选择 LZ4 或 Zstd 压缩，小包直接放行避免因压缩反而变大。
 
 ### （可选）量子环限制
 
@@ -134,11 +134,33 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 **没有定时扫地。** 触发方式只有两种：
 
 - MSPT ≥ 70（红色档位确认后）自动触发清理
-- 管理员执行扫地命令 `/cir cleanup`
+- 管理员执行扫地命令 `/cir cleanup`，或使用MCDR，KubeJS等外部包装方法间接执行该指令
 
 被清理的物品**不会消失**，而是进垃圾桶，**有效期 1 小时**。玩家用 `/cir trashbin` 或点击聊天栏的垃圾桶文字提示打开界面取回。
 
 带自定义名称的物品默认受保护（可在配置里关闭）。
+
+#### 常规清扫会跳过哪些东西
+
+为了避免垃圾桶在编码物品时造成客户端被踢下线，下列物品**不会被清理**，留在地面等玩家自行拾取：
+
+| 跳过 | 原因 |
+|---|---|
+| 所有旗帜 | 图案是静态注册表条目，两端未必一致 |
+| 潜影盒、Create 工具箱 | 内部物品表随物品走 |
+| 带方块实体数据的物品（讲台、刷怪笼等） | 同上 |
+| **任何带附魔的物品** | 数据包重载后旧附魔引用会失效，编码时找不到 id |
+
+因此，常规清扫**只处理普通掉落物**，带有数据的物品直接跳过。
+
+#### 强制清扫 `/cir forcecleanup`
+
+常规清扫指令无法缓解服务器压力时的最终解决办法：
+
+- 全服播报 **20 / 10 / 5 / 3 / 2 / 1** 秒倒计时
+- 倒计时结束后**清空所有掉落物**
+
+**通过本方法清空的掉落物无法收入垃圾桶**
 
 ## 前置
 
@@ -151,7 +173,7 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 
 ## 安装
 
-1. 下载 `create_cir_addition-3.4.2.jar`
+1. 下载 `create_cir_addition-3.x.x.jar`
 2. 放进 `mods/` 目录（若为服务器，客户端和服务端都要放！）
 3. 启动一次，生成 `config/create_cir_addition.toml`
 4. 按需调整配置，改完 `/reload` 或重启
@@ -163,14 +185,15 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 | 命令 | 权限 | 说明 |
 |---|---|---|
 | `/cir setHome <x> <y> <z>` | 4 | 设置主基地（固定落在主世界） |
-| `/cir home` | 0 | 查看当前基地坐标 |
+| `/cir home` | 0 | 查看当前基地坐标（**所有玩家可用**） |
 | `/cir quantum scan` | 4 | 扫描当前维度已加载区域，把现有量子环补登记进表 |
-| `/cir cleanup` | 4 | 立即清理地面掉落物 |
+| `/cir cleanup` | 4 | 立即清理地面掉落物（带数据的物品会跳过） |
+| `/cir forcecleanup` | 4 | 强制清扫：倒计时后清空所有掉落物，不进垃圾桶 |
 | `/cir trashbin` | 0 | 打开垃圾桶（**所有玩家可用**） |
 | `/cir redstonelinkoptimization <true\|false>` | 4 | 热切换红石终端优化 |
 | `/cir ae2generator` | 4 | 查看两个 AE2 发电方块的当前状态 |
 | `/cir ae2generator crystalresonance <true\|false>` | 4 | 开关水晶谐振发电机 |
-| `/cir ae2generator vibrationchamber <low\|normal\|boost>` | 4 | 切换谐振仓档位（带 Tab 补全） |
+| `/cir ae2generator vibrationchamber <low\|normal\|boost>` | 4 | 切换谐振仓档位（Tab 补全） |
 
 ## 配置
 
@@ -385,11 +408,33 @@ At `≥ 70` every confirmed reading broadcasts until MSPT drops back below it.
 **No timer-based cleanup.** Two triggers only:
 
 - Automatic, once MSPT reaches the red tier (≥ 70) and is confirmed
-- Manual, via `/cir cleanup`
+- Manual, via `/cir cleanup`, or invoked indirectly through external wrappers such as MCDR or KubeJS
 
 Swept items are **not destroyed** — they go into a trash bin valid for **1 hour**. Players reclaim them with `/cir trashbin`, or by clicking the trash-bin link in chat.
 
 Items carrying a custom name are protected by default (configurable).
+
+#### What the regular cleanup skips
+
+To avoid the trash bin getting a client kicked while encoding items, the following are **not cleaned up at all** — they stay on the ground for players to pick up themselves:
+
+| Skipped | Reason |
+|---|---|
+| All banners | Patterns are static registry entries that may differ between client and server |
+| Shulker boxes, Create toolboxes | Their contents travel with the item |
+| Items with block-entity data (lecterns, spawners) | Same as above |
+| **Anything enchanted** | After a datapack reload the old enchantment reference goes stale and cannot be encoded |
+
+As a result, the regular cleanup **only handles ordinary dropped items**; anything carrying data is skipped outright.
+
+#### Force cleanup `/cir forcecleanup`
+
+The final recourse when the regular cleanup command can no longer relieve server load:
+
+- Broadcasts a countdown at **20 / 10 / 5 / 3 / 2 / 1** seconds
+- When it reaches zero, **every dropped item is cleared**
+
+**Dropped items cleared this way cannot be retrieved from the trash bin.**
 
 ## Requirements
 
@@ -416,7 +461,8 @@ All commands live under `/cir`.
 | `/cir setHome <x> <y> <z>` | 4 | Set the main base (always lands in the Overworld) |
 | `/cir home` | 0 | Show current base coordinates |
 | `/cir quantum scan` | 4 | Scan loaded chunks of this dimension and register existing rings |
-| `/cir cleanup` | 4 | Sweep dropped items immediately |
+| `/cir cleanup` | 4 | Sweep dropped items immediately (items carrying data are skipped) |
+| `/cir forcecleanup` | 4 | Force sweep: countdown, then clear every dropped item without binning it |
 | `/cir trashbin` | 0 | Open the trash bin (**available to everyone**) |
 | `/cir redstonelinkoptimization <true\|false>` | 4 | Toggle the redstone link cache at runtime |
 | `/cir ae2generator` | 4 | Show the current state of both AE2 generators |
