@@ -138,6 +138,8 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 
 被清理的物品**不会消失**，而是进垃圾桶，**有效期 1 小时**。玩家用 `/cir trashbin` 或点击聊天栏的垃圾桶文字提示打开界面取回。
 
+手动执行 `/cir cleanup` 时，这条提示会全服广播，附带可点击的「打开垃圾桶」按钮。
+
 带自定义名称的物品默认受保护（可在配置里关闭）。
 
 #### 常规清扫会跳过哪些东西
@@ -147,11 +149,12 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 | 跳过 | 原因 |
 |---|---|
 | 所有旗帜 | 图案是静态注册表条目，两端未必一致 |
-| 潜影盒、Create 工具箱 | 内部物品表随物品走 |
-| 带方块实体数据的物品（讲台、刷怪笼等） | 同上 |
+| 17 种原版潜影盒 | 内部物品表随物品走 |
 | **任何带附魔的物品** | 数据包重载后旧附魔引用会失效，编码时找不到 id |
 
-因此，常规清扫**只处理普通掉落物**，带有数据的物品直接跳过。
+可堆叠的物品（石头、圆木这类）不做上述检查，直接清理。
+
+因此，常规清扫**只放过带数据的物品**，其余全部清走。
 
 #### 强制清扫 `/cir forcecleanup`
 
@@ -161,6 +164,8 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 - 倒计时结束后**清空所有掉落物**
 
 **通过本方法清空的掉落物无法收入垃圾桶**
+
+清空完成后，全服广播「强制清扫执行完毕」（红色加粗）。
 
 ## 前置
 
@@ -187,7 +192,7 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 | `/cir setHome <x> <y> <z>` | 4 | 设置主基地（固定落在主世界） |
 | `/cir home` | 0 | 查看当前基地坐标（**所有玩家可用**） |
 | `/cir quantum scan` | 4 | 扫描当前维度已加载区域，把现有量子环补登记进表 |
-| `/cir cleanup` | 4 | 立即清理地面掉落物（带数据的物品会跳过） |
+| `/cir cleanup` | 4 | 立即清理地面掉落物（旗帜、潜影盒、附魔物品会跳过） |
 | `/cir forcecleanup` | 4 | 强制清扫：倒计时后清空所有掉落物，不进垃圾桶 |
 | `/cir trashbin` | 0 | 打开垃圾桶（**所有玩家可用**） |
 | `/cir redstonelinkoptimization <true\|false>` | 4 | 热切换红石终端优化 |
@@ -412,6 +417,8 @@ At `≥ 70` every confirmed reading broadcasts until MSPT drops back below it.
 
 Swept items are **not destroyed** — they go into a trash bin valid for **1 hour**. Players reclaim them with `/cir trashbin`, or by clicking the trash-bin link in chat.
 
+When `/cir cleanup` is run manually, this message is broadcast to the whole server with a clickable trash bin button.
+
 Items carrying a custom name are protected by default (configurable).
 
 #### What the regular cleanup skips
@@ -421,11 +428,12 @@ To avoid the trash bin getting a client kicked while encoding items, the followi
 | Skipped | Reason |
 |---|---|
 | All banners | Patterns are static registry entries that may differ between client and server |
-| Shulker boxes, Create toolboxes | Their contents travel with the item |
-| Items with block-entity data (lecterns, spawners) | Same as above |
+| The 17 vanilla shulker boxes | Their contents travel with the item |
 | **Anything enchanted** | After a datapack reload the old enchantment reference goes stale and cannot be encoded |
 
-As a result, the regular cleanup **only handles ordinary dropped items**; anything carrying data is skipped outright.
+Stackable items (stone, logs and the like) skip all these checks and are cleared directly.
+
+As a result, the regular cleanup **only spares items that carry data**; everything else is taken.
 
 #### Force cleanup `/cir forcecleanup`
 
@@ -435,6 +443,8 @@ The final recourse when the regular cleanup command can no longer relieve server
 - When it reaches zero, **every dropped item is cleared**
 
 **Dropped items cleared this way cannot be retrieved from the trash bin.**
+
+Once the clear is done, "Force cleanup complete." is broadcast to the whole server in bold red.
 
 ## Requirements
 
@@ -461,7 +471,7 @@ All commands live under `/cir`.
 | `/cir setHome <x> <y> <z>` | 4 | Set the main base (always lands in the Overworld) |
 | `/cir home` | 0 | Show current base coordinates |
 | `/cir quantum scan` | 4 | Scan loaded chunks of this dimension and register existing rings |
-| `/cir cleanup` | 4 | Sweep dropped items immediately (items carrying data are skipped) |
+| `/cir cleanup` | 4 | Sweep dropped items immediately (banners, shulker boxes and enchanted items are skipped) |
 | `/cir forcecleanup` | 4 | Force sweep: countdown, then clear every dropped item without binning it |
 | `/cir trashbin` | 0 | Open the trash bin (**available to everyone**) |
 | `/cir redstonelinkoptimization <true\|false>` | 4 | Toggle the redstone link cache at runtime |
