@@ -193,15 +193,40 @@ public class HomeEvents {
                     })
                 )
                 // /cir forcecleanup —— 强制清扫（4 级）：全服倒计时后清空地面，不进垃圾桶
-                .then(Commands.literal("forcecleanup")
+                .then(Commands.literal("forceCleanup")
                     .requires(source -> source.hasPermission(4))
                     .executes(ctx -> {
                         startForceCleanup(ctx.getSource().getServer());
                         return 1;
                     })
                 )
+                // /cir manageGiftCode —— 兑换码管理（4 级）
+                .then(Commands.literal("manageGiftCode")
+                    .requires(source -> source.hasPermission(4))
+                    .executes(ctx -> {
+                        var player = ctx.getSource().getPlayer();
+                        if (player == null) {
+                            ctx.getSource().sendFailure(Component.translatable("cir.gift.no_player"));
+                            return 0;
+                        }
+                        com.cirserver.createciraddition.gift.GiftManageMenu.open(player);
+                        return 1;
+                    })
+                )
+                // /cir giftcode —— 打开兑换码界面，无权限要求
+                .then(Commands.literal("giftCode")
+                    .executes(ctx -> {
+                        var player = ctx.getSource().getPlayer();
+                        if (player == null) {
+                            ctx.getSource().sendFailure(Component.translatable("cir.gift.no_player"));
+                            return 0;
+                        }
+                        com.cirserver.createciraddition.gift.GiftDisclaimerMenu.open(player, com.cirserver.createciraddition.gift.GiftDisclaimerMenu.Next.REDEEM);
+                        return 1;
+                    })
+                )
                 // /cir trashbin —— 打开垃圾桶，无权限要求，所有玩家都能用
-                .then(Commands.literal("trashbin")
+                .then(Commands.literal("trashBin")
                     .executes(ctx -> {
                         var player = ctx.getSource().getPlayer();
                         if (player == null) {
@@ -228,7 +253,7 @@ public class HomeEvents {
                     })
                 )
                 // /cir redstonelinkoptimization <true|false> —— 红石终端优化开关（4 级，立即生效并写盘）
-                .then(Commands.literal("redstonelinkoptimization")
+                .then(Commands.literal("redstoneLinkOptimization")
                     .requires(source -> source.hasPermission(4))
                     .then(Commands.argument("enabled", BoolArgumentType.bool())
                         .executes(ctx -> {
@@ -259,10 +284,10 @@ public class HomeEvents {
                 )
                 // /cir ae2generator [crystalresonance <true|false> | vibrationchamber <low|normal|boost>]
                 // AE2 两个自发电方块的运行时调节（4 级）。改的是 AE2 自己的 ModConfigSpec，立即生效并写盘。
-                .then(Commands.literal("ae2generator")
+                .then(Commands.literal("ae2Generator")
                     .requires(source -> source.hasPermission(4))
                     .executes(ctx -> reportAe2Generators(ctx.getSource()))
-                    .then(Commands.literal("crystalresonance")
+                    .then(Commands.literal("crystalResonance")
                         .then(Commands.argument("enabled", BoolArgumentType.bool())
                             .executes(ctx -> {
                                 boolean enabled = BoolArgumentType.getBool(ctx, "enabled");
@@ -292,7 +317,7 @@ public class HomeEvents {
                             })
                         )
                     )
-                    .then(Commands.literal("vibrationchamber")
+                    .then(Commands.literal("vibrationChamber")
                         .then(Commands.argument("tier", StringArgumentType.word())
                             .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider
                                 .suggest(java.util.List.of("low", "normal", "boost"), builder))

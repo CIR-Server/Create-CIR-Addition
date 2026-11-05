@@ -34,7 +34,7 @@ import org.apache.logging.log4j.Logger;
 @Mod("create_cir_addition")
 public class CreateCIRAddition {
    public static final String MOD_ID = "create_cir_addition";
-   public static final String VERSION = "3.4.5";
+   public static final String VERSION = "3.4.6";
    public static final Logger LOGGER = LogManager.getLogger();
 
    public CreateCIRAddition(IEventBus modEventBus, ModContainer modContainer) {
@@ -61,6 +61,46 @@ public class CreateCIRAddition {
       } else {
          PayloadRegistrar registrar = event.registrar("create_cir_addition").versioned(VERSION);
          registrar.playBidirectional(CompressedPayload.TYPE, CompressedPayload.STREAM_CODEC, ClientNetworkHandler::handle);
+
+         // 兑换码：客户端提交、服务端回执。回执的处理器放在 lambda 里，
+         // 服务端加载这个类时不会去解析 Minecraft，只有真正收到包才会走进来。
+         registrar.playToServer(
+            com.cirserver.createciraddition.network.GiftSubmitPayload.TYPE,
+            com.cirserver.createciraddition.network.GiftSubmitPayload.STREAM_CODEC,
+            com.cirserver.createciraddition.network.GiftServerHandler::handleSubmit
+         );
+         registrar.playToClient(
+            com.cirserver.createciraddition.network.GiftResultPayload.TYPE,
+            com.cirserver.createciraddition.network.GiftResultPayload.STREAM_CODEC,
+            (payload, context) -> com.cirserver.createciraddition.client.GiftClientHandler.handleResult(payload, context)
+         );
+
+         registrar.playToServer(
+            com.cirserver.createciraddition.network.GiftManageActionPayload.TYPE,
+            com.cirserver.createciraddition.network.GiftManageActionPayload.STREAM_CODEC,
+            com.cirserver.createciraddition.network.GiftServerHandler::handleManageAction
+         );
+         registrar.playToServer(
+            com.cirserver.createciraddition.network.GiftCreatePayload.TYPE,
+            com.cirserver.createciraddition.network.GiftCreatePayload.STREAM_CODEC,
+            com.cirserver.createciraddition.network.GiftServerHandler::handleCreate
+         );
+         registrar.playToServer(
+            com.cirserver.createciraddition.network.GiftDisclaimerAckPayload.TYPE,
+            com.cirserver.createciraddition.network.GiftDisclaimerAckPayload.STREAM_CODEC,
+            com.cirserver.createciraddition.network.GiftServerHandler::handleDisclaimerAck
+         );
+         registrar.playToClient(
+            com.cirserver.createciraddition.network.GiftManageDataPayload.TYPE,
+            com.cirserver.createciraddition.network.GiftManageDataPayload.STREAM_CODEC,
+            (payload, context) -> com.cirserver.createciraddition.client.GiftClientHandler.handleManageData(payload, context)
+         );
+         registrar.playToClient(
+            com.cirserver.createciraddition.network.GiftCreateResultPayload.TYPE,
+            com.cirserver.createciraddition.network.GiftCreateResultPayload.STREAM_CODEC,
+            (payload, context) -> com.cirserver.createciraddition.client.GiftClientHandler.handleCreateResult(payload, context)
+         );
+
          LOGGER.info("Create CIR Addition: Network handlers registered.");
       }
    }

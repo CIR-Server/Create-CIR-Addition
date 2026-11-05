@@ -25,6 +25,9 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.TRASH_BIN_MENU.get(), TrashBinScreen::new);
-        CreateCIRAddition.LOGGER.info("Create CIR Addition: Trash bin screen registered.");
+        event.register(ModMenuTypes.GIFT_CODE_MENU.get(), GiftCodeScreen::new);
+        event.register(ModMenuTypes.GIFT_MANAGE_MENU.get(), GiftManageScreen::new);
+        event.register(ModMenuTypes.GIFT_DISCLAIMER_MENU.get(), GiftDisclaimerScreen::new);
+        CreateCIRAddition.LOGGER.info("Create CIR Addition: Trash bin and gift code screens registered.");
     }
 }

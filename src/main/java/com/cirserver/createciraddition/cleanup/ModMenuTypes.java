@@ -19,4 +19,19 @@ public class ModMenuTypes {
     @SuppressWarnings("DataFlowIssue")
     public static final Supplier<MenuType<TrashBinMenu>> TRASH_BIN_MENU =
         REGISTER.register("trash_bin", () -> new MenuType(TrashBinMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    @SuppressWarnings("DataFlowIssue")
+    public static final Supplier<MenuType<com.cirserver.createciraddition.gift.GiftCodeMenu>> GIFT_CODE_MENU =
+        REGISTER.register("gift_code",
+            () -> new MenuType(com.cirserver.createciraddition.gift.GiftCodeMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    @SuppressWarnings("DataFlowIssue")
+    public static final Supplier<MenuType<com.cirserver.createciraddition.gift.GiftManageMenu>> GIFT_MANAGE_MENU =
+        REGISTER.register("gift_manage",
+            () -> new MenuType(com.cirserver.createciraddition.gift.GiftManageMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    @SuppressWarnings("DataFlowIssue")
+    public static final Supplier<MenuType<com.cirserver.createciraddition.gift.GiftDisclaimerMenu>> GIFT_DISCLAIMER_MENU =
+        REGISTER.register("gift_disclaimer",
+            () -> new MenuType(com.cirserver.createciraddition.gift.GiftDisclaimerMenu::new, FeatureFlags.DEFAULT_FLAGS));
 }

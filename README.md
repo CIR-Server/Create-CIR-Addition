@@ -49,7 +49,7 @@ Create 的 `RedstoneLinkNetworkHandler.updateNetworkOf` 每次被调用都要遍
 
 **这个优化不会影响信号实时性** —— 信号值 `getTransmittedStrength()` 依然是实时读取，缓存的只是「这个节点是否存活」。最坏情况是同一 tick 内被拆掉的终端晚 1 tick 才被移出网络。
 
-可用 `/cir redstonelinkoptimization true|false` 热切换。
+可用 `/cir redstoneLinkOptimization true|false` 热切换。
 
 ### 网络压缩
 
@@ -136,7 +136,7 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 - MSPT ≥ 70（红色档位确认后）自动触发清理
 - 管理员执行扫地命令 `/cir cleanup`，或使用MCDR，KubeJS等外部包装方法间接执行该指令
 
-被清理的物品**不会消失**，而是进垃圾桶，**有效期 1 小时**。玩家用 `/cir trashbin` 或点击聊天栏的垃圾桶文字提示打开界面取回。
+被清理的物品**不会消失**，而是进垃圾桶，**有效期 1 小时**。玩家用 `/cir trashBin` 或点击聊天栏的垃圾桶文字提示打开界面取回。
 
 手动执行 `/cir cleanup` 时，这条提示会全服广播，附带可点击的「打开垃圾桶」按钮。
 
@@ -156,7 +156,7 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 
 因此，常规清扫**只放过带数据的物品**，其余全部清走。
 
-#### 强制清扫 `/cir forcecleanup`
+#### 强制清扫 `/cir forceCleanup`
 
 常规清扫指令无法缓解服务器压力时的最终解决办法：
 
@@ -166,6 +166,21 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 **通过本方法清空的掉落物无法收入垃圾桶**
 
 清空完成后，全服广播「强制清扫执行完毕」（红色加粗）。
+
+### 兑换码系统
+
+面向公益服务器的非商业兑换码功能。所有兑换码对全体玩家开放，**每人每个码限兑一次**，不支持按人发放或一次性码。
+
+- `/cir giftCode` —— 打开兑换界面（无权限要求）
+- `/cir manageGiftCode` —— 打开管理界面，权限 4
+
+兑换码可配置物品、经验值和状态效果。管理界面支持新建、作废、删除；作废后视同过期，删除会连同兑换记录一起清掉。
+
+配置保存在 `config/create_cir_addition/gift_codes.json`，首次运行自动生成。兑换记录存在世界存档里。
+
+两个界面打开前都会先弹出免责声明，说明本系统不支持任何商业性质的兑换码。
+
+> 依据 Mojang 商业使用指南，服务器不得销售影响游戏平衡的内容。CIR 团队不支持一切商业性质的兑换码行为。
 
 ## 前置
 
@@ -193,12 +208,14 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 | `/cir home` | 0 | 查看当前基地坐标（**所有玩家可用**） |
 | `/cir quantum scan` | 4 | 扫描当前维度已加载区域，把现有量子环补登记进表 |
 | `/cir cleanup` | 4 | 立即清理地面掉落物（旗帜、潜影盒、附魔物品会跳过） |
-| `/cir forcecleanup` | 4 | 强制清扫：倒计时后清空所有掉落物，不进垃圾桶 |
-| `/cir trashbin` | 0 | 打开垃圾桶（**所有玩家可用**） |
-| `/cir redstonelinkoptimization <true\|false>` | 4 | 热切换红石终端优化 |
-| `/cir ae2generator` | 4 | 查看两个 AE2 发电方块的当前状态 |
-| `/cir ae2generator crystalresonance <true\|false>` | 4 | 开关水晶谐振发电机 |
-| `/cir ae2generator vibrationchamber <low\|normal\|boost>` | 4 | 切换谐振仓档位（Tab 补全） |
+| `/cir forceCleanup` | 4 | 强制清扫：倒计时后清空所有掉落物，不进垃圾桶 |
+| `/cir trashBin` | 0 | 打开垃圾桶（**所有玩家可用**） |
+| `/cir giftCode` | 0 | 打开兑换码界面（**所有玩家可用**） |
+| `/cir manageGiftCode` | 4 | 打开兑换码管理界面 |
+| `/cir redstoneLinkOptimization <true\|false>` | 4 | 热切换红石终端优化 |
+| `/cir ae2Generator` | 4 | 查看两个 AE2 发电方块的当前状态 |
+| `/cir ae2Generator crystalResonance <true\|false>` | 4 | 开关水晶谐振发电机 |
+| `/cir ae2Generator vibrationChamber <low\|normal\|boost>` | 4 | 切换谐振仓档位（Tab 补全） |
 
 ## 配置
 
@@ -328,7 +345,7 @@ Create's `RedstoneLinkNetworkHandler.updateNetworkOf` walks the entire same-freq
 
 **Signal timing is unaffected** — `getTransmittedStrength()` is still read live; only the "is this node still alive" check is cached. Worst case, a link destroyed mid-tick leaves the network one tick later.
 
-Toggle at runtime with `/cir redstonelinkoptimization true|false`.
+Toggle at runtime with `/cir redstoneLinkOptimization true|false`.
 
 ### Network compression
 
@@ -415,7 +432,7 @@ At `≥ 70` every confirmed reading broadcasts until MSPT drops back below it.
 - Automatic, once MSPT reaches the red tier (≥ 70) and is confirmed
 - Manual, via `/cir cleanup`, or invoked indirectly through external wrappers such as MCDR or KubeJS
 
-Swept items are **not destroyed** — they go into a trash bin valid for **1 hour**. Players reclaim them with `/cir trashbin`, or by clicking the trash-bin link in chat.
+Swept items are **not destroyed** — they go into a trash bin valid for **1 hour**. Players reclaim them with `/cir trashBin`, or by clicking the trash-bin link in chat.
 
 When `/cir cleanup` is run manually, this message is broadcast to the whole server with a clickable trash bin button.
 
@@ -435,7 +452,7 @@ Stackable items (stone, logs and the like) skip all these checks and are cleared
 
 As a result, the regular cleanup **only spares items that carry data**; everything else is taken.
 
-#### Force cleanup `/cir forcecleanup`
+#### Force cleanup `/cir forceCleanup`
 
 The final recourse when the regular cleanup command can no longer relieve server load:
 
@@ -445,6 +462,21 @@ The final recourse when the regular cleanup command can no longer relieve server
 **Dropped items cleared this way cannot be retrieved from the trash bin.**
 
 Once the clear is done, "Force cleanup complete." is broadcast to the whole server in bold red.
+
+### Gift code system
+
+A non-commercial gift code feature for community servers. Every code is open to all players and **can be redeemed once per player**; per-player or single-use codes are not supported.
+
+- `/cir giftCode` — open the redeem screen (no permission needed)
+- `/cir manageGiftCode` — open the management screen (permission 4)
+
+A code can grant items, experience and status effects. The management screen supports creating, disabling and deleting codes; a disabled code counts as expired, and deleting removes its redemption records too.
+
+Codes live in `config/create_cir_addition/gift_codes.json`, generated on first launch. Redemption records are stored in the world save.
+
+Both screens show a disclaimer first, stating that this system does not support gift codes of any commercial nature.
+
+> Per Mojang's Commercial Usage Guidelines, servers may not sell content that affects game balance. The CIR team does not support gift code activity of any commercial nature.
 
 ## Requirements
 
@@ -472,12 +504,12 @@ All commands live under `/cir`.
 | `/cir home` | 0 | Show current base coordinates |
 | `/cir quantum scan` | 4 | Scan loaded chunks of this dimension and register existing rings |
 | `/cir cleanup` | 4 | Sweep dropped items immediately (banners, shulker boxes and enchanted items are skipped) |
-| `/cir forcecleanup` | 4 | Force sweep: countdown, then clear every dropped item without binning it |
-| `/cir trashbin` | 0 | Open the trash bin (**available to everyone**) |
-| `/cir redstonelinkoptimization <true\|false>` | 4 | Toggle the redstone link cache at runtime |
-| `/cir ae2generator` | 4 | Show the current state of both AE2 generators |
-| `/cir ae2generator crystalresonance <true\|false>` | 4 | Enable or disable the crystal resonance generator |
-| `/cir ae2generator vibrationchamber <low\|normal\|boost>` | 4 | Switch the vibration chamber tier (tab-completed) |
+| `/cir forceCleanup` | 4 | Force sweep: countdown, then clear every dropped item without binning it |
+| `/cir trashBin` | 0 | Open the trash bin (**available to everyone**) |
+| `/cir redstoneLinkOptimization <true\|false>` | 4 | Toggle the redstone link cache at runtime |
+| `/cir ae2Generator` | 4 | Show the current state of both AE2 generators |
+| `/cir ae2Generator crystalResonance <true\|false>` | 4 | Enable or disable the crystal resonance generator |
+| `/cir ae2Generator vibrationChamber <low\|normal\|boost>` | 4 | Switch the vibration chamber tier (tab-completed) |
 
 ## Configuration
 
