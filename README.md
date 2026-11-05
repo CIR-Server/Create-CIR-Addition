@@ -202,6 +202,8 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 
 所有命令在 `/cir` 下。
 
+> **3.4.6 起所有命令改为驼峰命名**，旧名（`forcecleanup`、`trashbin`、`redstonelinkoptimization` 等）不再可用。
+
 | 命令 | 权限 | 说明 |
 |---|---|---|
 | `/cir setHome <x> <y> <z>` | 4 | 设置主基地（固定落在主世界） |
@@ -497,6 +499,8 @@ Both screens show a disclaimer first, stating that this system does not support 
 ## Commands
 
 All commands live under `/cir`.
+
+> **Since 3.4.6 all commands use camelCase.** The old names (`forcecleanup`, `trashbin`, `redstonelinkoptimization`, etc.) no longer work.
 
 | Command | Permission | Description |
 |---|---|---|
