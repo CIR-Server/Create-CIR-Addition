@@ -62,5 +62,13 @@
     "cir.gift.disclaimer.accept":  "我已了解",
     "cir.gift.disclaimer.cancel":  "取消",
     "cir.gift.disclaimer.body":  "Create CIR Addition 為方便伺服器管理註冊此兌換碼系統。該兌換碼系統建立的兌換碼自動對全體玩家生效，每人皆可兌換一次，無法建立被特定玩家兌換一次即作廢的兌換碼。\n\n根據 Mojang 的商業使用指南，伺服器不得銷售影響遊戲平衡的內容（如透過消費獲得強力武器、特別權限等）。CIR 團隊堅定支持公益伺服器的營運，一切商業性質的兌換碼不被本模組支持，也不會加入後續開發。",
-    "cir.gift.disclaimer.signature":  "CIR 團隊\n2026.11.06"
+    "cir.gift.disclaimer.signature":  "CIR 團隊\n2026.11.06",
+    "cir.gift.manage.disable":  "作廢",
+    "cir.gift.manage.delete":  "刪除",
+    "cir.gift.manage.more":  "… 還有 %s 條",
+    "cir.gift.manage.codelabel":  "新兌換碼：",
+    "cir.gift.manage.xplabel":  "增加經驗值：",
+    "cir.trash.prev":  "上一頁",
+    "cir.trash.page":  "第 %s/%s 頁",
+    "cir.trash.next":  "下一頁"
 }

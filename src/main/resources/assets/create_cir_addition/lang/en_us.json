@@ -62,5 +62,13 @@
     "cir.gift.disclaimer.accept":  "I Understand",
     "cir.gift.disclaimer.cancel":  "Cancel",
     "cir.gift.disclaimer.body":  "Create CIR Addition registers this gift code system to make server management easier. Codes created here apply to every player automatically, each player may redeem a code once, and it is not possible to create a code that expires after one specific player redeems it.\n\nPer Mojang\u0027s Commercial Usage Guidelines, servers may not sell content that affects game balance (such as powerful weapons or special permissions obtained through payment). The CIR team firmly supports non-profit community servers; gift codes of any commercial nature are not supported by this mod and will not be added in future development.",
-    "cir.gift.disclaimer.signature":  "CIR Team\n06 Nov. 2026"
+    "cir.gift.disclaimer.signature":  "CIR Team\n06 Nov. 2026",
+    "cir.gift.manage.disable":  "Disable",
+    "cir.gift.manage.delete":  "Delete",
+    "cir.gift.manage.more":  "… %s more",
+    "cir.gift.manage.codelabel":  "Code:",
+    "cir.gift.manage.xplabel":  "Experience:",
+    "cir.trash.prev":  "Previous",
+    "cir.trash.page":  "Page %s/%s",
+    "cir.trash.next":  "Next"
 }

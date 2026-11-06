@@ -92,20 +92,20 @@ public class TrashBinMenu extends AbstractContainerMenu {
 
         if (this.currentPage > 0) {
             ItemStack prevArrow = new ItemStack(Items.ARROW);
-            prevArrow.set(DataComponents.CUSTOM_NAME, Component.literal("§e上一页"));
+            prevArrow.set(DataComponents.CUSTOM_NAME, Component.translatable("cir.trash.prev").withStyle(net.minecraft.ChatFormatting.YELLOW));
             this.container.setItem(SLOT_PREV, prevArrow);
         }
 
         ItemStack pageInfo = new ItemStack(Items.PAPER);
         pageInfo.set(
             DataComponents.CUSTOM_NAME,
-            Component.literal("§7第 " + (this.currentPage + 1) + "/" + totalPages + " 页")
+            Component.translatable("cir.trash.page", this.currentPage + 1, totalPages).withStyle(net.minecraft.ChatFormatting.GRAY)
         );
         this.container.setItem(SLOT_PAGE_INFO, pageInfo);
 
         if (this.currentPage < totalPages - 1) {
             ItemStack nextArrow = new ItemStack(Items.ARROW);
-            nextArrow.set(DataComponents.CUSTOM_NAME, Component.literal("§e下一页"));
+            nextArrow.set(DataComponents.CUSTOM_NAME, Component.translatable("cir.trash.next").withStyle(net.minecraft.ChatFormatting.YELLOW));
             this.container.setItem(SLOT_NEXT, nextArrow);
         }
 

@@ -86,12 +86,12 @@ public class GiftManageScreen extends AbstractContainerScreen<GiftManageMenu> {
             int finalI = i;
 
             this.addRenderableWidget(Button.builder(
-                Component.literal("作废"),
+                Component.translatable("cir.gift.manage.disable"),
                 b -> this.disable(this.rows.get(finalI).code())
             ).bounds(left + 210, y, 50, 18).build());
 
             this.addRenderableWidget(Button.builder(
-                Component.literal("删除"),
+                Component.translatable("cir.gift.manage.delete"),
                 b -> this.delete(this.rows.get(finalI).code())
             ).bounds(left + 266, y, 50, 18).build());
         }
@@ -276,7 +276,7 @@ public class GiftManageScreen extends AbstractContainerScreen<GiftManageMenu> {
                 if (this.rows.size() > MAX_ROWS) {
                     graphics.drawString(
                         this.font,
-                        Component.literal("… 还有 " + (this.rows.size() - MAX_ROWS) + " 条"),
+                        Component.translatable("cir.gift.manage.more", this.rows.size() - MAX_ROWS),
                         left + 20, top + 28 + MAX_ROWS * ROW_HEIGHT, 0xA0A0A0
                     );
                 }
@@ -286,7 +286,7 @@ public class GiftManageScreen extends AbstractContainerScreen<GiftManageMenu> {
                 this.font, Component.translatable("cir.gift.manage.newtitle"), this.width / 2, top + 8, 0xFFFFFF
             );
 
-            graphics.drawString(this.font, Component.literal("新兑换码："), left + 20, top + 30, 0xA0A0A0);
+            graphics.drawString(this.font, Component.translatable("cir.gift.manage.codelabel"), left + 20, top + 30, 0xA0A0A0);
 
             graphics.drawString(
                 this.font,
@@ -310,7 +310,7 @@ public class GiftManageScreen extends AbstractContainerScreen<GiftManageMenu> {
                 left + 28, top + 112, 0xB8B8B8
             );
 
-            graphics.drawString(this.font, Component.literal("增加经验值："), left + 20, top + 154, 0xA0A0A0);
+            graphics.drawString(this.font, Component.translatable("cir.gift.manage.xplabel"), left + 20, top + 154, 0xA0A0A0);
         }
 
         if (!this.status.getString().isEmpty()) {

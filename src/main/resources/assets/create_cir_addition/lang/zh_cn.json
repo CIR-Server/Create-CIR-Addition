@@ -62,5 +62,13 @@
     "cir.gift.disclaimer.accept":  "我已了解",
     "cir.gift.disclaimer.cancel":  "取消",
     "cir.gift.disclaimer.body":  "Create CIR Addition 为方便服务器管理注册此兑换码系统。该兑换码系统创建的兑换码自动对全体玩家生效，每人均可兑换一次，无法创建被特定玩家兑换一次就作废的兑换码。\n\n根据 Mojang 的商业使用指南，服务器不得销售影响游戏平衡的内容（如通过消费获得强力武器、特别权限等）。CIR 团队坚定支持公益服务器的运营，一切商业性质的兑换码不被本模组支持，也不会加入后续开发。",
-    "cir.gift.disclaimer.signature":  "CIR 团队\n2026.11.06"
+    "cir.gift.disclaimer.signature":  "CIR 团队\n2026.11.06",
+    "cir.gift.manage.disable":  "作废",
+    "cir.gift.manage.delete":  "删除",
+    "cir.gift.manage.more":  "… 还有 %s 条",
+    "cir.gift.manage.codelabel":  "新兑换码：",
+    "cir.gift.manage.xplabel":  "增加经验值：",
+    "cir.trash.prev":  "上一页",
+    "cir.trash.page":  "第 %s/%s 页",
+    "cir.trash.next":  "下一页"
 }
