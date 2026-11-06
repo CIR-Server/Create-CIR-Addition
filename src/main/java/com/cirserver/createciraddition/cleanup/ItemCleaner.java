@@ -305,7 +305,7 @@ public final class ItemCleaner {
         return Component.translatable("cir.cleanup.openbin")
             .withStyle(
                 Style.EMPTY
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cir trashbin"))
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cir trashBin"))
                     .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
                         Component.translatable("cir.cleanup.openbin.hover", TrashBin.DEFAULT_DURATION_SECONDS / 60)
