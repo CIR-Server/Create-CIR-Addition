@@ -21,8 +21,6 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * 地面掉落物清理（扫地）。
- *
- * 从老版 Duolingo Super 的 {@code CleanupScheduler} 移植，改动：
  */
 public final class ItemCleaner {
 

@@ -283,12 +283,6 @@ msptWarnEnabled = true
 - **老的量子环不会自动登记**。升级后进游戏跑一次 `/cir quantum scan`，把现有环补进表里，否则它们会被当成新桥重新判定一遍
 - 如果你的存档里有大量量子环且已超出当前限制，**建议先跑 scan 再改限制值**
 
-## 致谢
-
-- **KawaiiMIra114** —— 本项目的前身 *Duolingo Super* 的作者。早期的 Create 优化
-  mixin 与网络压缩层源自他的工作，CIR 服务器在此基础上继续开发。原作者已停止维护并退出项目，原始仓库现已不可访问。
-- CIR 服务器的早期成员 —— 2025 年的立项与初期规划。
-
 ## AI 使用披露
 
 该项目由 CIR 服务器成员于 2025 年立项进行，后续因成员变动本项目被搁置，2026 年 11 月通过 DeepSeek v4.1 Flash 1017 模型结合此前开发计划和已完成代码补全，因此部分 JAVA 代码由 AI 生成。
@@ -578,11 +572,6 @@ Upgrading from an older version:
 
 - **Existing rings are not registered automatically.** After upgrading, run `/cir quantum scan` once in-game to pull them into the table; otherwise they are judged as new rings
 - If the save already contains more rings than the current limits allow, **run scan before tightening the limits**
-
-## Credits
-
-- **KawaiiMIra114** — author of *Duolingo Super*, from which this project descends. The early Create optimization mixins and the network compression layer originated in their work; the CIR server continued development from there. The original author has stopped maintaining the project and the upstream repository is no longer available.
-- Early CIR server members — the 2025 kickoff and initial planning.
 
 ## AI Usage Disclosure
 

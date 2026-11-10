@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * 被清理掉的掉落物暂存区。
  *
- * 从老版 Duolingo Super 移植。清理时收集到的物品不会凭空消失，
+ * 清理时收集到的物品不会凭空消失，
  */
 public class TrashBin {
 
