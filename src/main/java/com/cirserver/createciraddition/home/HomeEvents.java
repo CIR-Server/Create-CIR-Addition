@@ -249,6 +249,23 @@ public class HomeEvents {
                             (id, inv, p) -> new com.cirserver.createciraddition.cleanup.TrashBinMenu(id, inv, p),
                             Component.translatable("cir.cleanup.bin_title")
                         ));
+
+                        // 把桶内数据同步给客户端。
+                        // TrashBin 是静态单例，专用服务器上客户端那份永远是 null ——
+                        // 不同步的话客户端看不到物品，点一下还会触发 closeContainer 关窗。
+                        if (player instanceof ServerPlayer serverPlayer) {
+                            java.util.List<net.minecraft.world.item.ItemStack> snapshot =
+                                new java.util.ArrayList<>(bin.getTotalItems());
+                            for (int i = 0; i < bin.getTotalItems(); i++) {
+                                snapshot.add(bin.getItemAt(i));
+                            }
+                            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+                                serverPlayer,
+                                new com.cirserver.createciraddition.network.TrashBinSyncPayload(
+                                    snapshot, bin.getRemainingSeconds()
+                                )
+                            );
+                        }
                         return 1;
                     })
                 )
