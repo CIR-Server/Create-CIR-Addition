@@ -2,16 +2,22 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+从 3.4.7fix 起，每条变更中英并列（英文用缩进跟在中文条目下面）。
+Entries are bilingual starting from 3.4.7fix; the English line is indented under its Chinese counterpart.
+
 ## [3.4.7fix] - 2026-11-16
 
-### 修复
+### 修复 / Fixes
 
 - **工作盆工作时被拆除引发的客户端网络错误**：动力冲压机在工作盆上运行的瞬间，如果下方工作盆被拆除，服务端会把数量为 0 的物品写进方块实体的粒子同步包；客户端解析为空物品栈，创建粒子时抛出 `IllegalArgumentException: Empty stacks are not allowed`，直接掉线。现在同步前会先把空物品栈从粒子列表里剔除。
+  **Client network error when a basin is destroyed mid-press**: if the basin under a mechanical press is destroyed at the moment the press runs, the server writes an item stack with count 0 into the block entity's particle sync packet. The client parses it as an empty stack and throws `IllegalArgumentException: Empty stacks are not allowed`, dropping the connection. Fixed: empty stacks are now stripped from the particle list before the packet is sent.
 - 同步修复了 `PressingBehaviour` 中因物品被消耗而残留在粒子列表里的空物品栈（同一根因）。
+  Also fixed leftover empty stacks in `PressingBehaviour` after an item is consumed (same root cause).
 
-### 说明
+### 说明 / Notes
 
 - 网络通道协商版本保持 `3.4.7` 不变，旧客户端仍可连接；模组列表显示 `3.4.7fix`。
+  The payload channel version stays at `3.4.7`, so older clients can still connect; the mod list shows `3.4.7fix`.
 
 ## [3.4.6-fix] - 2026-11-06
 
