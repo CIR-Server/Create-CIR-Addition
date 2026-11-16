@@ -25,7 +25,7 @@ Create CIR Addition 是一个针对机械动力综合服务器的服务端附属
 
 该模组每一项优化都对应一处具体的 Create 内部实现，每一个改动均为了方便服务器的构建和管理。绝大多数功能可以通过修改配置文件调节。
 
-## 修复记录
+## 修复记录 [临时！将在Create修复bug后移除此内容]
 
 ### 3.4.7fix — 工作盆被拆除导致的客户端网络错误
 
@@ -331,7 +331,7 @@ Create CIR Addition is a server-side add-on for Create-focused modpacks. It cove
 
 Each optimization maps to a specific piece of Create's internals, and every change exists to make a server easier to build and run. Nearly all of it is tunable through the config file.
 
-## Fixes
+## Fixes [Temporary - Will be removed after Create mod fix this bug]
 
 ### 3.4.7fix — client network error when a basin is broken mid-press
 
