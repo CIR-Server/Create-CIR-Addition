@@ -14,7 +14,8 @@
                    "MixinBasinBlockEntity",
                    "MixinFunnelBlockEntity",
                    "MixinBeltBlockEntity",
-                   "MixinQuantumBridge"
+                   "MixinQuantumBridge",
+                   "MixinPressingBehaviour"
                ],
     "client":  [
 

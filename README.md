@@ -25,6 +25,20 @@ Create CIR Addition 是一个针对机械动力综合服务器的服务端附属
 
 该模组每一项优化都对应一处具体的 Create 内部实现，每一个改动均为了方便服务器的构建和管理。绝大多数功能可以通过修改配置文件调节。
 
+## 修复记录
+
+### 3.4.7fix — 工作盆被拆除导致的客户端网络错误
+
+机械压床在**工作盆**上运行的瞬间，如果下方工作盆被拆除，服务端会把一个**数量为 0 的物品**写进方块实体的粒子同步包。客户端解析出来是空物品栈，创建粒子时抛出：
+
+```
+java.lang.IllegalArgumentException: Empty stacks are not allowed
+```
+
+表现是客户端直接弹出「网络协议错误」并掉线。该问题在 3.4.7fix 中修复：同步前先把空物品栈从粒子列表里剔除，不再发送这类数据。
+
+> 本版本网络通道协商版本仍为 `3.4.7`，旧客户端可正常连接，模组列表显示版本为 `3.4.7fix`。
+
 ## 功能
 
 ### 机械动力机械运行优化
@@ -316,6 +330,20 @@ Create CIR Addition is a server-side add-on for Create-focused modpacks. It cove
 3. **Operations** — MSPT warnings, emergency item cleanup, trash bin recovery
 
 Each optimization maps to a specific piece of Create's internals, and every change exists to make a server easier to build and run. Nearly all of it is tunable through the config file.
+
+## Fixes
+
+### 3.4.7fix — client network error when a basin is broken mid-press
+
+If the basin under a mechanical press is destroyed at the exact moment the press runs, the server writes an item stack with **count 0** into the block entity's particle sync packet. The client parses it as an empty stack and throws:
+
+```
+java.lang.IllegalArgumentException: Empty stacks are not allowed
+```
+
+which shows up as a "network protocol error" disconnect. Fixed in 3.4.7fix: empty stacks are now stripped from the particle list before the packet is sent.
+
+> The payload channel version stays at `3.4.7`, so older clients can still connect; the mod list shows `3.4.7fix`.
 
 ## Features
 
