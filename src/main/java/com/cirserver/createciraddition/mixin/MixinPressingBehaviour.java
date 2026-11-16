@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * 修 Create 6.0.10 机械压床的一个客户端崩溃：
+ * 修 Create 6.0.10 动力辊压机（Mechanical Press）的一个客户端崩溃：
  *
  * MechanicalPressBlockEntity 把「活的 ItemStack 引用」塞进 PressingBehaviour.particleItems，
  * 之后物品被消耗，同一个对象变成 count=0。同步给客户端时写出 count:0，
