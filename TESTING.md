@@ -19,3 +19,13 @@ Before publishing, perform the runtime checks in CONTRIBUTING.md, including:
 - Check a setup without ThroughputQuest/AE2 and a Create version other than 6.0.10: optional patches must be skipped in the log.
 
 Static checks cannot establish that runtime mixin application or a live connection succeeds. The 3.4.8 local build has not yet completed these runtime checks.
+
+## RollingGate startup regression
+
+Four live thread snapshots on 2026-11-20 showed RollingGate 1.1.0+build.66's configuration-loading worker stuck in `GLFW.glfwSetWindowAttrib`, while the render thread waited for that worker through `ModLoader.waitForFuture`. GLFW permits this window call only on the main thread.
+
+`tools/rollinggate-regression/src` is an isolated test harness using fake Minecraft/GLFW endpoints. Compile it separately, then put its output directory first on the classpath, followed by compiled CIR classes and ASM dependencies. Run `RollingGateRegression <rolling-gate.jar>`. Never package these test doubles in the mod JAR.
+
+All 14 assertions passed: the loading worker returns without waiting, no off-thread native call occurs, queued updates preserve handles/values/order, main-thread updates work, other/missing versions skip the patch, and both real target calls match the redirect descriptor. The original 2,301 regression assertions also passed again.
+
+Runtime acceptance: start the previously hanging client, confirm the version-gated patch enables and the loading screen reaches the main menu, then enter a test world and verify ThroughputQuest. Recheck logs for mixin errors. A dedicated server must not load `MixinRollingGateWindow` or its client helper.

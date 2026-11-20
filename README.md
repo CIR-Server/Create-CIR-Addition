@@ -29,6 +29,7 @@ Create CIR Addition 是一个针对机械动力综合服务器的服务端附属
 
 ### 3.4.8 — 吞吐量检测兼容修复与条件补丁
 
+- 修复 RollingGate `1.1.0+build.66` 加载配置时从后台线程修改 GLFW 窗口属性造成的启动卡死；更新被非阻塞地调度到游戏主线程。此补丁只对对应版本的客户端启用，不加载到专用服务器。
 - 修复 ThroughputQuest 1.0.0 对 AdvancedAE 私有 Mixin 访问器的调用：改用 AE2 的公开 getter，覆盖服务端检测与客户端渲染。仅检测到 `throughput_quest` 和 `ae2` 时启用；不需要修改第三方 JAR。
 - 工作盆被拆除时的动力冲压机空粒子修复仅对 **Create 6.0.10** 启用。其他版本自动跳过此补丁，其他工作盆优化保持原有行为。
 - CIR 网络协议升级为 **3.4.8**。新版服务器接受协议 **3.4.7、3.4.8**，拒绝更早或未知协议；其他模组的协商不变。新版客户端连接旧版服务器时仍受旧服务器的严格检查限制。`3.4.7fix` 使用协议 `3.4.7`，属于兼容范围。
@@ -342,6 +343,7 @@ Each optimization maps to a specific piece of Create's internals, and every chan
 
 ### 3.4.8 — ThroughputQuest compatibility and conditional patches
 
+- Fix a startup hang in RollingGate `1.1.0+build.66` by dispatching GLFW window updates from the configuration-loading worker to the game thread without blocking loading. This patch is client-only and version-gated; dedicated servers do not load it.
 - Replace ThroughputQuest 1.0.0's calls to AdvancedAE's removed private mixin accessor with AE2 public getters, covering server watchers and client rendering. Enabled only when both `throughput_quest` and `ae2` are installed; no third-party JAR changes are needed.
 - Enable the empty press-particle fix only for **Create 6.0.10**. Other Create versions skip this fix; existing basin optimizations retain their behavior.
 - Upgrade the CIR payload protocol to **3.4.8**. Updated servers accept **3.4.7 and 3.4.8** only. Older and unknown protocols are rejected, and other mods retain their original negotiation rules. Updated clients still cannot bypass strict negotiation on an older server. `3.4.7fix` uses protocol `3.4.7` and is accepted.

@@ -20,7 +20,7 @@
                    "MixinNetworkComponentNegotiator"
                ],
     "client":  [
-
+                   "MixinRollingGateWindow"
                ],
     "server":  [
 

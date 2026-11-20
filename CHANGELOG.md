@@ -9,6 +9,8 @@ Entries are bilingual starting from 3.4.7fix; the English line is indented under
 
 ### 修复 / Fixes
 
+- 修复 RollingGate 1.1.0+build.66 在加载配置的后台线程调用 GLFW 窗口函数造成的启动卡死：窗口属性更新改为非阻塞地交给游戏主线程。仅在对应版本的客户端启用，专用服务器不加载此补丁。
+  Fix a startup hang in RollingGate 1.1.0+build.66 caused by invoking GLFW window functions on the configuration-loading worker. Window updates are dispatched to the game thread without blocking loading. The patch is client-only and gated to that version.
 - ThroughputQuest 1.0.0 直接引用已移除的 AdvancedAE 私有 Mixin 访问器，导致配置吞吐量检测面板时服务端崩溃；现在用 AE2 等价公开 getter 替换服务端与客户端的三处调用，保留原有检测、渲染与任务逻辑。
   ThroughputQuest 1.0.0 directly references a removed AdvancedAE private mixin accessor, crashing the server when configuring its monitor. Three calls in server and client code now use equivalent AE2 public getters, preserving detection, rendering and quest behavior.
 - 修复补丁在缺少可选模组时的加载边界：吞吐量补丁要求 ThroughputQuest 与 AE2 同时存在；动力冲压机空物品粒子补丁严格限定 Create 6.0.10，不改变其他工作盆优化。

@@ -47,6 +47,13 @@ public class CirMixinPlugin implements IMixinConfigPlugin {
                 version, enabled ? "enabled" : "skipped (requires 6.0.10)");
             return enabled;
         }
+        if (mixinClassName.endsWith(".MixinRollingGateWindow")) {
+            String version = modVersion("rolling_gate");
+            boolean enabled = CompatibilityPatches.enableRollingGateFix(version);
+            LOGGER.info("Create CIR Addition: RollingGate version = {}, window main-thread fix {}",
+                version, enabled ? "enabled" : "skipped (requires 1.1.0+build.66)");
+            return enabled;
+        }
         return true;
     }
 

@@ -25,6 +25,10 @@ public final class CompatibilityPatches {
         return "6.0.10".equals(createVersion);
     }
 
+    public static boolean enableRollingGateFix(String version) {
+        return "1.1.0+build.66".equals(version);
+    }
+
     /**
      * ThroughputQuest 1.0 calls an AdvancedAE implementation-detail mixin accessor
      * removed by newer AdvancedAE. AE2 already exposes equivalent public getters.
