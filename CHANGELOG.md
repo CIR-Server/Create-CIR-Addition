@@ -5,6 +5,26 @@
 从 3.4.7fix 起，每条变更中英并列（英文用缩进跟在中文条目下面）。
 Entries are bilingual starting from 3.4.7fix; the English line is indented under its Chinese counterpart.
 
+## [3.4.8] - 2026-11-20
+
+### 修复 / Fixes
+
+- 修复 RollingGate 1.1.0+build.66 在加载配置的后台线程调用 GLFW 窗口函数造成的启动卡死：窗口属性更新改为非阻塞地交给游戏主线程。仅在对应版本的客户端启用，专用服务器不加载此补丁。
+  Fix a startup hang in RollingGate 1.1.0+build.66 caused by invoking GLFW window functions on the configuration-loading worker. Window updates are dispatched to the game thread without blocking loading. The patch is client-only and gated to that version.
+- ThroughputQuest 1.0.0 直接引用已移除的 AdvancedAE 私有 Mixin 访问器，导致配置吞吐量检测面板时服务端崩溃；现在用 AE2 等价公开 getter 替换服务端与客户端的三处调用，保留原有检测、渲染与任务逻辑。
+  ThroughputQuest 1.0.0 directly references a removed AdvancedAE private mixin accessor, crashing the server when configuring its monitor. Three calls in server and client code now use equivalent AE2 public getters, preserving detection, rendering and quest behavior.
+- 修复补丁在缺少可选模组时的加载边界：吞吐量补丁要求 ThroughputQuest 与 AE2 同时存在；动力冲压机空物品粒子补丁严格限定 Create 6.0.10，不改变其他工作盆优化。
+  Gate the throughput patch on both ThroughputQuest and AE2. Restrict the empty press-particle fix to Create 6.0.10 without changing other basin optimizations.
+- 补齐 HomeEvents 使用但语言文件缺失的 20 个键（三种语言），并修正 Gradle manifest 的 Mixin 配置文件名以匹配实际资源。
+  Supply 20 missing HomeEvents translation keys in all three languages and correct the Gradle manifest's mixin configuration filename to match the packaged resource.
+
+### 说明 / Notes
+
+- 网络协议升级为 3.4.8；新版服务器仅接受 3.4.7 或 3.4.8。3.4.7fix 的协议仍是 3.4.7，因此兼容。更早版本不再兼容，其他模组协商、通道方向与必需通道检查均保留。
+  The payload protocol is now 3.4.8. Updated servers accept only 3.4.7 or 3.4.8; release 3.4.7fix uses protocol 3.4.7 and remains accepted. Older protocols are no longer supported. Other mods, packet flow checks and required channel validation retain their original rules.
+- 本次没有更改数据包格式，也没有修改 NeoForge 版本。新版客户端仍不能绕过旧版服务器自身的严格协议检查。
+  Payload formats and the NeoForge version are unchanged. Updated clients cannot bypass strict version checks performed by an older server.
+
 ## [3.4.7fix] - 2026-11-16
 
 ### 修复 / Fixes

@@ -110,7 +110,7 @@ tasks.named('jar', Jar).configure {
             'Implementation-Version'  : project.jar.archiveVersion,
             'Implementation-Vendor'   : mod_authors,
             // Mixin 配置入口，缺了这一行模组启动时会因为找不到 mixins.json 直接崩
-            'MixinConfigs'            : "${mod_id}.mixins.json"
+            'MixinConfigs'            : 'createciraddition.mixins.json'
         ])
     }
 }

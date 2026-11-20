@@ -25,7 +25,29 @@ Create CIR Addition 是一个针对机械动力综合服务器的服务端附属
 
 该模组每一项优化都对应一处具体的 Create 内部实现，每一个改动均为了方便服务器的构建和管理。绝大多数功能可以通过修改配置文件调节。
 
-## 修复记录 [临时！将在Create修复bug后移除此内容]
+## 修复记录
+
+### 3.4.8 — 吞吐量检测兼容修复与条件补丁
+
+- 修复 RollingGate `1.1.0+build.66` 加载配置时从后台线程修改 GLFW 窗口属性造成的启动卡死；更新被非阻塞地调度到游戏主线程。此补丁只对对应版本的客户端启用，不加载到专用服务器。
+- 修复 ThroughputQuest 1.0.0 对 AdvancedAE 私有 Mixin 访问器的调用：改用 AE2 的公开 getter，覆盖服务端检测与客户端渲染。仅检测到 `throughput_quest` 和 `ae2` 时启用；不需要修改第三方 JAR。
+- 工作盆被拆除时的动力冲压机空粒子修复仅对 **Create 6.0.10** 启用。其他版本自动跳过此补丁，其他工作盆优化保持原有行为。
+- CIR 网络协议升级为 **3.4.8**。新版服务器接受协议 **3.4.7、3.4.8**，拒绝更早或未知协议；其他模组的协商不变。新版客户端连接旧版服务器时仍受旧服务器的严格检查限制。`3.4.7fix` 使用协议 `3.4.7`，属于兼容范围。
+- 补齐 AE2 发电控制、强制清扫和开关状态的三语翻译。
+
+#### 自动检测与启用范围
+
+兼容补丁在启动时由 `CirMixinPlugin` 自动检测；不需要手动开启，也不会把可选模组变成必装依赖。
+
+工作盆空粒子补丁是临时兼容措施；Create 上游修复后可移除该项。这个说明不涉及 ThroughputQuest、RollingGate 等其他兼容修复。
+
+| 修复 | 自动启用条件 | 范围 |
+|---|---|---|
+| 动力冲压机空物品粒子 / 拆除工作盆时掉线 | Create 版本号**严格等于 `6.0.10`** | 其他 Create 版本跳过这一补丁；不影响原有工作盆及其他 Create 优化 |
+| ThroughputQuest 旧访问器兼容 | 同时安装 `throughput_quest` 和 `ae2` | 修复服务端检测及客户端渲染；针对 1.0.0 实测通过，仅替换明确匹配的旧调用，新版本没有这些调用时不作替换 |
+| RollingGate 窗口设置导致启动卡死 | **客户端**安装 `rolling_gate`，版本号**严格等于 `1.1.0+build.66`** | 将窗口属性修改交给游戏主线程；专用服务器不加载该补丁 |
+
+缺少对应模组或不满足版本条件时，相关补丁自动跳过。ThroughputQuest 使用的是“安装检测＋旧调用匹配”，不是把所有版本的模组逻辑整体覆盖。日志会记录各项条件补丁是否启用。
 
 ### 3.4.7fix — 工作盆被拆除导致的客户端网络错误
 
@@ -35,9 +57,9 @@ Create CIR Addition 是一个针对机械动力综合服务器的服务端附属
 java.lang.IllegalArgumentException: Empty stacks are not allowed
 ```
 
-表现是客户端直接弹出「网络协议错误」并掉线。该问题在 3.4.7fix 中修复：同步前先把空物品栈从粒子列表里剔除，不再发送这类数据。
+表现是客户端直接弹出「网络协议错误」并掉线。该问题在 3.4.7fix 中修复：创建粒子前先把空物品栈从粒子列表里剔除，避免将其用于粒子构造。
 
-> 本版本网络通道协商版本仍为 `3.4.7`，旧客户端可正常连接，模组列表显示版本为 `3.4.7fix`。
+> 历史版本 3.4.7fix 的网络通道协商版本为 `3.4.7`，旧客户端可正常连接，模组列表显示版本为 `3.4.7fix`。
 
 ## 功能
 
@@ -331,7 +353,29 @@ Create CIR Addition is a server-side add-on for Create-focused modpacks. It cove
 
 Each optimization maps to a specific piece of Create's internals, and every change exists to make a server easier to build and run. Nearly all of it is tunable through the config file.
 
-## Fixes [Temporary - Will be removed after Create mod fix this bug]
+## Fixes
+
+### 3.4.8 — ThroughputQuest compatibility and conditional patches
+
+- Fix a startup hang in RollingGate `1.1.0+build.66` by dispatching GLFW window updates from the configuration-loading worker to the game thread without blocking loading. This patch is client-only and version-gated; dedicated servers do not load it.
+- Replace ThroughputQuest 1.0.0's calls to AdvancedAE's removed private mixin accessor with AE2 public getters, covering server watchers and client rendering. Enabled only when both `throughput_quest` and `ae2` are installed; no third-party JAR changes are needed.
+- Enable the empty press-particle fix only for **Create 6.0.10**. Other Create versions skip this fix; existing basin optimizations retain their behavior.
+- Upgrade the CIR payload protocol to **3.4.8**. Updated servers accept **3.4.7 and 3.4.8** only. Older and unknown protocols are rejected, and other mods retain their original negotiation rules. Updated clients still cannot bypass strict negotiation on an older server. `3.4.7fix` uses protocol `3.4.7` and is accepted.
+- Complete the English, Simplified Chinese and Traditional Chinese translations for AE2 generation controls, forced cleanup and toggle states.
+
+#### Automatic detection and activation
+
+`CirMixinPlugin` checks these compatibility patches at startup. No manual switch is needed, and optional integrations do not become required dependencies.
+
+The empty basin/press-particle patch is a temporary workaround and can be removed after Create fixes the upstream bug. This does not apply to the separate ThroughputQuest or RollingGate compatibility fixes.
+
+| Fix | Activation condition | Scope |
+|---|---|---|
+| Empty mechanical-press particles / disconnect when a basin is removed | The installed Create version is **exactly `6.0.10`** | Other Create versions skip this patch; existing basin and other Create optimizations remain unchanged |
+| ThroughputQuest legacy accessor compatibility | Both `throughput_quest` and `ae2` are installed | Covers server detection and client rendering; tested with 1.0.0. Only explicitly matched legacy calls are rewritten, so newer versions without those calls are left untouched |
+| RollingGate window-setting startup hang | A **client** has `rolling_gate` version **exactly `1.1.0+build.66`** | Dispatches window attribute updates to the game thread; dedicated servers do not load this patch |
+
+Missing mods or unmatched versions cause the corresponding patch to be skipped automatically. ThroughputQuest uses mod-presence checks plus exact legacy-call matching rather than replacing the behavior of every version. Startup logs report whether each conditional patch is enabled.
 
 ### 3.4.7fix — client network error when a basin is broken mid-press
 
@@ -341,9 +385,9 @@ If the basin under a mechanical press is destroyed at the exact moment the press
 java.lang.IllegalArgumentException: Empty stacks are not allowed
 ```
 
-which shows up as a "network protocol error" disconnect. Fixed in 3.4.7fix: empty stacks are now stripped from the particle list before the packet is sent.
+which shows up as a "network protocol error" disconnect. Fixed in 3.4.7fix: empty stacks are stripped from the particle list before constructing particles.
 
-> The payload channel version stays at `3.4.7`, so older clients can still connect; the mod list shows `3.4.7fix`.
+> Historical release 3.4.7fix uses payload channel version `3.4.7`, so older clients can still connect; the mod list shows `3.4.7fix`.
 
 ## Features
 
