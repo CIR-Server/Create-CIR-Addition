@@ -29,3 +29,9 @@ Four live thread snapshots on 2026-11-20 showed RollingGate 1.1.0+build.66's con
 All 14 assertions passed: the loading worker returns without waiting, no off-thread native call occurs, queued updates preserve handles/values/order, main-thread updates work, other/missing versions skip the patch, and both real target calls match the redirect descriptor. The original 2,301 regression assertions also passed again.
 
 Runtime acceptance: start the previously hanging client, confirm the version-gated patch enables and the loading screen reaches the main menu, then enter a test world and verify ThroughputQuest. Recheck logs for mixin errors. A dedicated server must not load `MixinRollingGateWindow` or its client helper.
+
+## Observed client runtime result (2026-11-20)
+
+The repaired client loaded MixinRollingGateWindow at 20:54:56, registered CIR payload handlers at 20:55:24, started an integrated server at 20:55:52, and applied MixinNetworkComponentNegotiator at 20:55:59. The player entered the world successfully. The user then confirmed that placing/configuring the ThroughputQuest monitor produced correct counts and rendering. Startup, world entry, protocol 3.4.8 local connection and the reported ThroughputQuest reproduction now pass.
+
+Dedicated-server startup, live protocol 3.4.7 client compatibility, and the full optional-mod/version runtime matrix have not been performed. These remain release checks; no remote deployment or public publication has occurred.
