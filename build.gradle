@@ -69,8 +69,6 @@ dependencies {
     // Zstd 压缩库（网络压缩模块用）
     implementation 'com.github.luben:zstd-jni:1.5.6-4'
 
-    // Standalone bytecode regression checks need ASM util/tree/analysis at test compile time.
-    testImplementation 'org.ow2.asm:asm-util:9.8'
 }
 
 // 把 gradle.properties 里的版本号写进 mods.toml

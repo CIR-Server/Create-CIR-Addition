@@ -1,6 +1,6 @@
 # Compatibility regression checks
 
-`src/test/java/CompatibilityRegression.java` is a standalone Java 21 static regression harness. It reads class files with ASM and does not launch Minecraft or execute third-party mod classes.
+`tools/compatibility-regression/src/CompatibilityRegression.java` is a standalone Java 21 static regression harness. It reads class files with ASM and does not launch Minecraft or execute third-party mod classes. Both standalone harnesses live outside Gradle's JUnit source set because they require explicitly supplied mod JARs and are invoked manually; a successful Gradle build does not mean these harnesses were run.
 
 Compile it with the project's runtime dependencies (ASM core/tree/analysis/util included) and compiled main classes on the classpath. Run:
 
@@ -34,4 +34,4 @@ Runtime acceptance: start the previously hanging client, confirm the version-gat
 
 The repaired client loaded MixinRollingGateWindow at 20:54:56, registered CIR payload handlers at 20:55:24, started an integrated server at 20:55:52, and applied MixinNetworkComponentNegotiator at 20:55:59. The player entered the world successfully. The user then confirmed that placing/configuring the ThroughputQuest monitor produced correct counts and rendering. Startup, world entry, protocol 3.4.8 local connection and the reported ThroughputQuest reproduction now pass.
 
-Dedicated-server startup, live protocol 3.4.7 client compatibility, and the full optional-mod/version runtime matrix have not been performed. These remain release checks; no remote deployment or public publication has occurred.
+Dedicated-server startup, live protocol 3.4.7 client compatibility, and the full optional-mod/version runtime matrix have not been performed. No remote deployment has occurred. GitHub release v3.4.8 was subsequently published at the user's request with these validation limits documented in its release notes.
