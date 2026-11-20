@@ -15,7 +15,9 @@
                    "MixinFunnelBlockEntity",
                    "MixinBeltBlockEntity",
                    "MixinQuantumBridge",
-                   "MixinPressingBehaviour"
+                   "MixinPressingBehaviour",
+                   "MixinThroughputDetectionMonitorPart",
+                   "MixinNetworkComponentNegotiator"
                ],
     "client":  [
 

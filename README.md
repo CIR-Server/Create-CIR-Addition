@@ -27,6 +27,13 @@ Create CIR Addition 是一个针对机械动力综合服务器的服务端附属
 
 ## 修复记录
 
+### 3.4.8 — 吞吐量检测兼容修复与条件补丁
+
+- 修复 ThroughputQuest 1.0.0 对 AdvancedAE 私有 Mixin 访问器的调用：改用 AE2 的公开 getter，覆盖服务端检测与客户端渲染。仅检测到 `throughput_quest` 和 `ae2` 时启用；不需要修改第三方 JAR。
+- 工作盆被拆除时的动力冲压机空粒子修复仅对 **Create 6.0.10** 启用。其他版本自动跳过此补丁，其他工作盆优化保持原有行为。
+- CIR 网络协议升级为 **3.4.8**。新版服务器接受协议 **3.4.7、3.4.8**，拒绝更早或未知协议；其他模组的协商不变。新版客户端连接旧版服务器时仍受旧服务器的严格检查限制。`3.4.7fix` 使用协议 `3.4.7`，属于兼容范围。
+- 补齐 AE2 发电控制、强制清扫和开关状态的三语翻译。
+
 ### 3.4.7fix — 工作盆被拆除导致的客户端网络错误
 
 动力冲压机在**工作盆**上运行的瞬间，如果下方工作盆被拆除，服务端会把一个**数量为 0 的物品**写进方块实体的粒子同步包。客户端解析出来是空物品栈，创建粒子时抛出：
@@ -37,7 +44,7 @@ java.lang.IllegalArgumentException: Empty stacks are not allowed
 
 表现是客户端直接弹出「网络协议错误」并掉线。该问题在 3.4.7fix 中修复：同步前先把空物品栈从粒子列表里剔除，不再发送这类数据。
 
-> 本版本网络通道协商版本仍为 `3.4.7`，旧客户端可正常连接，模组列表显示版本为 `3.4.7fix`。
+> 历史版本 3.4.7fix 的网络通道协商版本为 `3.4.7`，旧客户端可正常连接，模组列表显示版本为 `3.4.7fix`。
 
 ## 功能
 
@@ -333,6 +340,13 @@ Each optimization maps to a specific piece of Create's internals, and every chan
 
 ## Fixes
 
+### 3.4.8 — ThroughputQuest compatibility and conditional patches
+
+- Replace ThroughputQuest 1.0.0's calls to AdvancedAE's removed private mixin accessor with AE2 public getters, covering server watchers and client rendering. Enabled only when both `throughput_quest` and `ae2` are installed; no third-party JAR changes are needed.
+- Enable the empty press-particle fix only for **Create 6.0.10**. Other Create versions skip this fix; existing basin optimizations retain their behavior.
+- Upgrade the CIR payload protocol to **3.4.8**. Updated servers accept **3.4.7 and 3.4.8** only. Older and unknown protocols are rejected, and other mods retain their original negotiation rules. Updated clients still cannot bypass strict negotiation on an older server. `3.4.7fix` uses protocol `3.4.7` and is accepted.
+- Complete the English, Simplified Chinese and Traditional Chinese translations for AE2 generation controls, forced cleanup and toggle states.
+
 ### 3.4.7fix — client network error when a basin is broken mid-press
 
 If the basin under a mechanical press is destroyed at the exact moment the press runs, the server writes an item stack with **count 0** into the block entity's particle sync packet. The client parses it as an empty stack and throws:
@@ -343,7 +357,7 @@ java.lang.IllegalArgumentException: Empty stacks are not allowed
 
 which shows up as a "network protocol error" disconnect. Fixed in 3.4.7fix: empty stacks are now stripped from the particle list before the packet is sent.
 
-> The payload channel version stays at `3.4.7`, so older clients can still connect; the mod list shows `3.4.7fix`.
+> Historical release 3.4.7fix uses payload channel version `3.4.7`, so older clients can still connect; the mod list shows `3.4.7fix`.
 
 ## Features
 

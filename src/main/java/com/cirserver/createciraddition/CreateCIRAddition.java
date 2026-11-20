@@ -34,7 +34,7 @@ import org.apache.logging.log4j.Logger;
 @Mod("create_cir_addition")
 public class CreateCIRAddition {
    public static final String MOD_ID = "create_cir_addition";
-   public static final String VERSION = "3.4.7";
+   public static final String VERSION = "3.4.8";
    public static final Logger LOGGER = LogManager.getLogger();
 
    public CreateCIRAddition(IEventBus modEventBus, ModContainer modContainer) {
@@ -104,9 +104,8 @@ public class CreateCIRAddition {
          // 垃圾桶同步：服务端打开界面时把桶内物品发给客户端。
          // 不加这个的话，专用服务器上客户端看不到桶里的东西，点一下就关窗。
          //
-         // 用 optional()：旧客户端（3.4.6-fix 原版）没有这个通道，
-         // 注册成可选之后它们照样能连服，只是收不到同步、垃圾桶还是老样子。
-         // 不这么写的话，旧客户端会因为「缺少必需通道」被 NeoForge 拒绝连接。
+         // Keep this auxiliary channel optional. Required CIR channels negotiate
+         // protocol 3.4.8 and accept only 3.4.7 or 3.4.8 peers.
          registrar.optional().playToClient(
             com.cirserver.createciraddition.network.TrashBinSyncPayload.TYPE,
             com.cirserver.createciraddition.network.TrashBinSyncPayload.STREAM_CODEC,
