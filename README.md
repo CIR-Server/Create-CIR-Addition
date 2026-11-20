@@ -7,9 +7,11 @@
 
 面向 **机械动力（Create）服务器**的优化与网络管理附属。
 
-Language: English (US) /简体中文（中国大陆）/繁體中文（台灣）
-
 An optimization and network management add-on built for **Create-based servers**.
+
+**Language: English (US) /简体中文（中国大陆）/繁體中文（台灣）**
+
+**未安装机械动力模组时无法使用本模组 Cannot work without CREATE mod**
 
 **中文** ｜ [English](#english)
 
