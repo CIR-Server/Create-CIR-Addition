@@ -1,31 +1,33 @@
 {
-    "required":  true,
-    "minVersion":  "0.8.5",
-    "package":  "com.cirserver.createciraddition.mixin",
-    "plugin":  "com.cirserver.createciraddition.mixin.CirMixinPlugin",
-    "refmap":  "createciraddition.refmap.json",
-    "compatibilityLevel":  "JAVA_21",
-    "mixins":  [
-                   "MixinMountedStorageManager",
-                   "MixinPackageEntity",
-                   "MixinSmartBlockEntity",
-                   "MixinLinkBehaviour",
-                   "MixinChainConveyorBlockEntity",
-                   "MixinBasinBlockEntity",
-                   "MixinFunnelBlockEntity",
-                   "MixinBeltBlockEntity",
-                   "MixinQuantumBridge",
-                   "MixinPressingBehaviour",
-                   "MixinThroughputDetectionMonitorPart",
-                   "MixinNetworkComponentNegotiator"
-               ],
-    "client":  [
-                   "MixinRollingGateWindow"
-               ],
-    "server":  [
-
-               ],
-    "injectors":  {
-                      "defaultRequire":  0
-                  }
+    "required": true,
+    "minVersion": "0.8.5",
+    "package": "com.cirserver.createciraddition.mixin",
+    "plugin": "com.cirserver.createciraddition.mixin.CirMixinPlugin",
+    "refmap": "createciraddition.refmap.json",
+    "compatibilityLevel": "JAVA_21",
+    "mixins": [
+        "MixinMountedStorageManager",
+        "MixinPackageEntity",
+        "MixinSmartBlockEntity",
+        "MixinLinkBehaviour",
+        "MixinChainConveyorBlockEntity",
+        "MixinBasinBlockEntity",
+        "MixinFunnelBlockEntity",
+        "MixinBeltBlockEntity",
+        "MixinQuantumBridge",
+        "MixinPressingBehaviour",
+        "MixinThroughputDetectionMonitorPart",
+        "MixinNetworkComponentNegotiator",
+        "MixinCeiGemCutting",
+        "MixinPerfectItemName",
+        "MixinExecutingAffix",
+        "MixinBossFinalDamage"
+    ],
+    "client": [
+        "MixinRollingGateWindow"
+    ],
+    "server": [],
+    "injectors": {
+        "defaultRequire": 0
+    }
 }

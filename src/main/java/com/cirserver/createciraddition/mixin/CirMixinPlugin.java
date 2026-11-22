@@ -26,6 +26,11 @@ public class CirMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if ((mixinClassName.endsWith(".MixinExecutingAffix") || mixinClassName.endsWith(".MixinBossFinalDamage"))) {
+            boolean present = modVersion("apotheosis") != null;
+            LOGGER.info("Create CIR Addition: Boss Guard {} (requires Apotheosis)", present ? "enabled" : "skipped");
+            return present;
+        }
         if (mixinClassName.endsWith(".MixinQuantumBridge")) {
             // 注意：mixin 阶段 ModList 还没初始化完，必须用 LoadingModList
             boolean present = modVersion("ae2") != null;
@@ -52,6 +57,25 @@ public class CirMixinPlugin implements IMixinConfigPlugin {
             boolean enabled = CompatibilityPatches.enableRollingGateFix(version);
             LOGGER.info("Create CIR Addition: RollingGate version = {}, window main-thread fix {}",
                 version, enabled ? "enabled" : "skipped (requires 1.1.0+build.66)");
+            return enabled;
+        }
+        if (mixinClassName.endsWith(".MixinCeiGemCutting")) {
+            // CEI 的宝石切割器限制：需要 Apotheosis + 附魔工业同时安装
+            boolean apotheosis = modVersion("apotheosis") != null;
+            boolean cei = modVersion("create_enchantment_industry") != null;
+            boolean enabled = apotheosis && cei;
+            LOGGER.info("Create CIR Addition: gem cutter policy {} (apotheosis={}, cei={})",
+                enabled ? "enabled" : "skipped", apotheosis, cei);
+            return enabled;
+        }
+        if (mixinClassName.endsWith(".MixinPerfectItemName")) {
+            // PERFECT 彩虹名字：需要 Apotheosis（提供 GradientColor）+ KubeJS
+            // 具体物品是否存在在运行期由 PerfectItemNames 判定
+            boolean apotheosis = modVersion("apotheosis") != null;
+            boolean kubejs = modVersion("kubejs") != null;
+            boolean enabled = apotheosis && kubejs;
+            LOGGER.info("Create CIR Addition: perfect rainbow name {} (apotheosis={}, kubejs={})",
+                enabled ? "enabled" : "skipped", apotheosis, kubejs);
             return enabled;
         }
         return true;

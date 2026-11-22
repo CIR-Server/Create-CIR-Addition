@@ -5,6 +5,54 @@
 从 3.4.7fix 起，每条变更中英并列（英文用缩进跟在中文条目下面）。
 Entries are bilingual starting from 3.4.7fix; the English line is indented under its Chinese counterpart.
 
+## [3.5.0] - 2026-11-22
+
+### 新增 / Added
+
+- 原生实现可配置、按模组分组的 Boss 限伤、低血量保护、过量伤害反制、半血回复、限时狂暴与粒子提示。
+  Native configurable per-mod Boss Guard with damage caps, berserk/cooldown, overkill response and once-per-boss half-health healing.
+- 必须安装 Apotheosis 才启用整套 Boss Guard；缺少各 Boss 所属模组时跳过该组。处决拦截在真正满足处决条件后、图腾检查与死亡音效之前执行，五次后只移除主手处决词条。
+  The ENTIRE feature requires Apotheosis; optional classes are gated before mixin application. Block only eligible executions before totem checks/death sound; strip only the executing affix after five attempts.
+- 新增三语提示及 `/cir bossguard reload`；配置无效时保留现行策略，成功重载清理临时状态。
+  Add three locales and explicit safe config reload.
+- 狂暴粒子按触发时机区分：半血阶段用火焰，其余用绿色；半径 2.5 格，首秒密集后每 2 秒一次。
+  Berserk particles differ by trigger: flame for the half-health phase, green otherwise; 2.5-block radius, dense for the first second then every 2 seconds.
+
+### 修复 / Fixed
+
+- 半血阶段改为强制一次性事件，优先于狂暴免伤、冷却和爆发／过量伤害。真实扣血先截断至恰好 50%，随后按 40／60／80 独立回血并刷新火焰狂暴。
+  Make the one-time half-health phase mandatory: truncate final HP loss at exactly 50%, then apply the configured heal and refresh flame berserk, including during green immunity/cooldown.
+- 低血量下限在护甲、抗性、附魔和吸收之后的真实扣血点执行，弱输入不抬伤，非原本致命的补足伤害不单独击杀。
+  Enforce the floor at final HP damage after reductions, without inflating weak inputs or turning a non-finishing raw hit into a floor-only kill.
+- 普通和半血狂暴三语提示明确说明无敌；半血提示报告实际回复生命。
+  Explicitly report invincibility in both messages and actual recovered HP for the half-health phase.
+
+### 变更 / Changed
+
+- 网络协议严格为 3.5.0，不再接受 3.4.x 或其他版本。保留已有条件补丁和 3.4.9 内容。
+  Require exact protocol 3.5.0 on both sides; older protocol versions are incompatible. Keep existing conditional patches and 3.4.9 content.
+- 保持展示版本及网络协议为 3.5.0；未安装神化时包括新增原生扣血钩子在内，整套保护均跳过。
+  Keep version/protocol 3.5.0; the additional native damage hook is also gated on Apotheosis.
+
+## [3.4.9] - 2026-11-21
+
+### 新增 / Added
+
+- 宝石切割器限制：附魔工业的宝石切割升阶只允许输入 CRACKED、CHIPPED 两档，更高纯度必须走序列组装。通过 Mixin 拦截 `GemCutting.canCut`，仅在神化与附魔工业同时安装时启用。
+  Gem cutter restriction: gem cutting only accepts CRACKED/CHIPPED input purity; higher grades must go through sequenced assembly. Implemented by intercepting `GemCutting.canCut`, enabled only when Apotheosis and Create Enchantment Industry are both installed.
+- PERFECT 彩虹名字：`appgen:singularity_generator_256m` 与 `extendedae:infinity_water_cell` 显示神话品质的彩虹名字。反射取 Placebo 的 `GradientColor.RAINBOW`，运行时判定物品是否存在，取不到颜色就退回原组件。
+  PERFECT rainbow names for `appgen:singularity_generator_256m` and `extendedae:infinity_water_cell`. Reads Placebo's `GradientColor.RAINBOW` reflectively, checks item existence at runtime, and falls back to the original component when the colour is unavailable.
+
+### 变更 / Changed
+
+- 网络通道版本升至 3.4.9，仍接受 3.4.7 与 3.4.8 对端 —— payload 定义未变，4.0 服务端可直接连接。
+  The payload channel version is now 3.4.9 and still accepts 3.4.7/3.4.8 peers. Payload definitions are unchanged, so 4.0 servers connect directly.
+
+### 说明 / Notes
+
+- `cir_apotheosis_policy` 已并入本模组，部署时必须移除该独立 jar，否则 `canCut` 会被两处同时注入。
+  `cir_apotheosis_policy` is merged into this mod; the standalone jar must be removed on deployment or `canCut` will be injected twice.
+
 ## [3.4.8] - 2026-11-20
 
 ### 修复 / Fixes

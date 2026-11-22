@@ -34,3 +34,6 @@ gradle-app.setting
 *.tmp
 *.bak
 *.bak_*
+
+# 本地备份目录
+_bak/

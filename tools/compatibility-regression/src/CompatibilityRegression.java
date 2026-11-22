@@ -82,12 +82,12 @@ public class CompatibilityRegression {
             check(!CompatibilityPatches.enablePressingFix(version), "unexpected Create version enabled: " + version);
         }
         check(CompatibilityPatches.enablePressingFix("6.0.10"), "Create 6.0.10 enables patch");
-        for (String left : List.of("3.4.7", "3.4.8")) for (String right : List.of("3.4.7", "3.4.8")) {
+        for (String left : List.of("3.5.0")) for (String right : List.of("3.5.0")) {
             check(NetworkCompatibility.matches("create_cir_addition", left, right), "supported CIR pair rejected");
         }
-        for (String bad : Arrays.asList(null, "", "3.4.6", "3.4.6-fix", "3.4.7fix", "3.4.9", "*")) {
-            check(!NetworkCompatibility.matches("create_cir_addition", "3.4.8", bad), "unsupported CIR protocol accepted: " + bad);
-            check(!NetworkCompatibility.matches("create_cir_addition", bad, "3.4.8"), "reverse unsupported CIR protocol accepted");
+        for (String bad : Arrays.asList(null, "", "3.4.6", "3.4.6-fix", "3.4.7", "3.4.8", "3.4.7fix", "3.4.9", "*")) {
+            check(!NetworkCompatibility.matches("create_cir_addition", "3.5.0", bad), "unsupported CIR protocol accepted: " + bad);
+            check(!NetworkCompatibility.matches("create_cir_addition", bad, "3.5.0"), "reverse unsupported CIR protocol accepted");
         }
         check(!NetworkCompatibility.matches("ae2", "3.4.8", "3.4.7"), "other mod versions must not be relaxed");
         check(NetworkCompatibility.matches("ae2", "1", "1"), "other mod equal versions preserved");

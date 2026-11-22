@@ -29,7 +29,17 @@ Create CIR Addition 是一个针对机械动力综合服务器的服务端附属
 
 该模组每一项优化都对应一处具体的 Create 内部实现，每一个改动均为了方便服务器的构建和管理。绝大多数功能可以通过修改配置文件调节。
 
+## 3.5.0 — Boss 保护
+
+仅在安装 **Apotheosis** 时启用整套 Boss Guard，包括伤害限制、狂暴、回复和处决拦截；未安装时全部跳过。
+配置：`config/create_cir_addition-boss-guard.json`，按 `cataclysm`、`twilightforest`、`minecraft` 分组；未安装的组跳过。管理员用 `/cir bossguard reload` 原子重载，格式错误保留上一份配置。
+默认：单次最多最大生命的50%；低于半血时按当前生命10%限伤，最低伤害上限为15（原版Boss为20），小于等于15的攻击跳过低血规则。狂暴10秒免伤、攻击+10，结束后冷却20秒。半血首次触发回复40/60/80。
+处决按真实触发条件计数，在图腾消耗、死亡音效和清空生命之前拦截；第五次移除主手处决词条，保留其他词条和物品组件。`generic_kill` 管理员清理始终放行。
+**网络仅兼容3.5.0，客户端与服务器需一起升级；3.4.x不再兼容。** 本次只做离线验证及本地部署。
+
 ## 修复记录
+
+**3.5.0 同版本实测修复：** 半血阶段不再被绿色狂暴、免伤或冷却跳过。先将真实伤害截断至恰好半血，再独立回复生命并刷新火焰狂暴。低血量下限在护甲、抗性和吸收之后执行；三语提示明确说明无敌。版本／协议均保持 3.5.0，缺少神化时所有 Boss 保护继续关闭。
 
 ### 3.4.8 — 吞吐量检测兼容修复与条件补丁
 
@@ -66,6 +76,24 @@ java.lang.IllegalArgumentException: Empty stacks are not allowed
 > 历史版本 3.4.7fix 的网络通道协商版本为 `3.4.7`，旧客户端可正常连接，模组列表显示版本为 `3.4.7fix`。
 
 ## 功能
+
+### Boss 防爆发保护
+
+仅在安装 **Apotheosis** 时启用，缺少该模组时整套功能不注册。
+
+| 规则 | 行为 |
+|---|---|
+| 单次伤害上限 | 不超过最大生命 × 50% |
+| 低血量保护 | 血量低于 50% 时，单次扣血 ≤ `max(当前生命 × 10%, 组下限)`；输入 ≤15 的攻击跳过低血规则 |
+| 过量反制 | 单次伤害超过最大生命时取消伤害，扣掉当前血量一半并进入狂暴 |
+| 半血强制 | 首次跌破 50% 必定触发，按初始最大生命回复 40 / 60 / 80 |
+| 爆发狂暴 | 玩家单次伤害 > 100 触发 |
+
+狂暴持续 10 秒，期间免疫一切伤害、攻击力 +10；结束后冷却 20 秒。粒子按触发时机区分颜色：半血阶段为火焰，其余为绿色。
+
+处决拦截：神话的处决词缀对受保护 Boss 无效，拦截发生在图腾检查和死亡音效之前。同一玩家被拦 5 次后，移除其主手武器的处决词条并全服播报。
+
+管理员 `/kill` 与 `generic_kill` 始终放行。
 
 ### 机械动力机械运行优化
 
@@ -258,6 +286,7 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 | `/cir ae2Generator` | 4 | 查看两个 AE2 发电方块的当前状态 |
 | `/cir ae2Generator crystalResonance <true\|false>` | 4 | 开关水晶谐振发电机 |
 | `/cir ae2Generator vibrationChamber <low\|normal\|boost>` | 4 | 切换谐振仓档位（Tab 补全） |
+| `/cir bossguard reload` | 2 | 原子重载 Boss Guard 配置；格式错误时保留上一份 |
 
 ## 配置
 
@@ -269,6 +298,42 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 network = true    # 网络压缩
 create  = true    # Create 优化 mixin 总开关
 ```
+
+### Boss 防爆发保护
+
+独立配置文件：`config/create_cir_addition-boss-guard.json`
+
+```jsonc
+{
+  "bossGroups": [
+    {
+      "mod": "cataclysm",
+      "bossList": ["cataclysm:ignis", "..."],
+      "lowHealthDamageRatio": 0.10,
+      "lowHealthMinDamage": 15.0,
+      "lowHealthSkipThreshold": 15.0
+    }
+  ],
+  "global": {
+    "singleHitCapRatio": 0.50,
+    "lowHealthThresholdRatio": 0.50,
+    "burstTriggerDamage": 100.0,
+    "berserkDurationMs": 10000,
+    "berserkCooldownMs": 20000,
+    "berserkAttackBonus": 10.0,
+    "halfHealthHealSmall": 40.0,
+    "halfHealthHealMedium": 60.0,
+    "halfHealthHealLarge": 80.0,
+    "halfHealthHealThresholds": [400.0, 700.0],
+    "particleRadius": 2.5,
+    "executionBlockStripCount": 5
+  }
+}
+```
+
+- `mod` 是分组键，同时作为启用开关：该模组未安装时整组跳过。
+- `lowHealthMinDamage` 可逐组配置，默认 minecraft 组 20，其余 15。
+- 改完执行 `/cir bossguard reload`，不需要重启。
 
 ### 性能
 
@@ -347,6 +412,15 @@ msptWarnEnabled = true
 
 # English
 
+### 3.5.0 — Boss Guard
+
+Unreleased build correction: the one-time half-health phase takes priority over active berserk and cooldown. Final HP damage stops exactly at 50%, then the configured heal is applied. The floor is enforced after armor/resistance/absorption. Both messages explicitly state invincibility. Version and protocol remain 3.5.0.
+
+The entire Boss Guard module requires **Apotheosis**. Without it, caps, berserk, healing, particles and execution blocking are all disabled. Configured entity groups also require their owning mods. Edit `config/create_cir_addition-boss-guard.json` and run `/cir bossguard reload`; invalid edits retain the previous policy. Berserk lasts 10 seconds followed by a 20-second cooldown. Eligible executions are intercepted before totem use, death sound and health mutation; the fifth blocked attempt removes only the main-hand executing affix. Administrator `generic_kill` bypasses protection.
+
+**Only protocol 3.5.0 is accepted; client and server must match.** Previous 3.4.x versions are incompatible. This build has compilation/offline checks only; no game was launched or remote server deployed.
+
+
 ## Overview
 
 Create CIR Addition is a server-side add-on for Create-focused modpacks. It covers three areas:
@@ -394,6 +468,24 @@ which shows up as a "network protocol error" disconnect. Fixed in 3.4.7fix: empt
 > Historical release 3.4.7fix uses payload channel version `3.4.7`, so older clients can still connect; the mod list shows `3.4.7fix`.
 
 ## Features
+
+### Boss Guard
+
+Requires **Apotheosis**; the entire module is skipped when it is absent.
+
+| Rule | Behaviour |
+|---|---|
+| Per-hit cap | No more than 50% of max health |
+| Low-health protection | Below half health, a hit removes at most `max(current HP × 10%, group floor)`; hits ≤15 skip the rule |
+| Overkill response | Damage above max health is cancelled, halves current HP and triggers berserk |
+| Half-health phase | The first crossing of 50% always fires; heals 40 / 60 / 80 by initial max health |
+| Burst berserk | A single player hit above 100 triggers it |
+
+Berserk lasts 10 seconds with full damage immunity and +10 attack; a 20-second cooldown follows. Particle colour depends on the trigger: flame for the half-health phase, green otherwise.
+
+Execution blocking: Apotheosis execution affixes cannot kill protected bosses; the block happens before totem checks and the death sound. Five blocked attempts strip the executing affix from the main-hand item and broadcast server-wide.
+
+Administrator `/kill` and `generic_kill` always bypass protection.
 
 ### Create machinery tick optimization
 
@@ -584,6 +676,7 @@ All commands live under `/cir`.
 | `/cir ae2Generator` | 4 | Show the current state of both AE2 generators |
 | `/cir ae2Generator crystalResonance <true\|false>` | 4 | Enable or disable the crystal resonance generator |
 | `/cir ae2Generator vibrationChamber <low\|normal\|boost>` | 4 | Switch the vibration chamber tier (tab-completed) |
+| `/cir bossguard reload` | 2 | Atomically reload the Boss Guard config; invalid edits keep the previous policy |
 
 ## Configuration
 
@@ -595,6 +688,42 @@ File: `config/create_cir_addition.toml`
 network = true    # network compression
 create  = true    # master switch for the Create optimization mixins
 ```
+
+### Boss Guard
+
+Separate config file: `config/create_cir_addition-boss-guard.json`
+
+```jsonc
+{
+  "bossGroups": [
+    {
+      "mod": "cataclysm",
+      "bossList": ["cataclysm:ignis", "..."],
+      "lowHealthDamageRatio": 0.10,
+      "lowHealthMinDamage": 15.0,
+      "lowHealthSkipThreshold": 15.0
+    }
+  ],
+  "global": {
+    "singleHitCapRatio": 0.50,
+    "lowHealthThresholdRatio": 0.50,
+    "burstTriggerDamage": 100.0,
+    "berserkDurationMs": 10000,
+    "berserkCooldownMs": 20000,
+    "berserkAttackBonus": 10.0,
+    "halfHealthHealSmall": 40.0,
+    "halfHealthHealMedium": 60.0,
+    "halfHealthHealLarge": 80.0,
+    "halfHealthHealThresholds": [400.0, 700.0],
+    "particleRadius": 2.5,
+    "executionBlockStripCount": 5
+  }
+}
+```
+
+- `mod` is the group key and also the activation gate: the group is skipped when that mod is absent.
+- `lowHealthMinDamage` is per-group; defaults are 20 for `minecraft` and 15 for the others.
+- Apply changes with `/cir bossguard reload`; no restart needed.
 
 ### Performance
 

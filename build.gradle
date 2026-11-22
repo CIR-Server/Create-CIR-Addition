@@ -58,6 +58,13 @@ repositories {
 }
 
 dependencies {
+    // Optional API compilation for Boss Guard and the existing perfect-item policy.
+    // Runtime activation is gated; these JARs are never bundled or made required.
+    // Example: -Pcir_optional_mods_dir=D:/Minecraft/.minecraft/versions/CIR-MODPACK-v4.1/mods
+    if (providers.gradleProperty('cir_optional_mods_dir').isPresent()) {
+        compileOnly fileTree(dir: providers.gradleProperty('cir_optional_mods_dir').get(),
+            includes: ['*Apotheosis*.jar', '*ApothicAttributes*.jar', '*Placebo*.jar', '*placebo*.jar'])
+    }
     // Create —— 硬前置，mods.toml 里是 required
     implementation "maven.modrinth:create:${create_version}"
 

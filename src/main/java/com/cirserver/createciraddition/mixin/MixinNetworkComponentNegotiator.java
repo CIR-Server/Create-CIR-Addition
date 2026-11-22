@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-/** Preserve channel/flow validation; relax only CIR's first version comparison. */
+/** Preserve channel/flow validation; enforce strict 3.5.0 for CIR's first version comparison. */
 @Mixin(targets = "net.neoforged.neoforge.network.negotiation.NetworkComponentNegotiator", remap = false)
 public abstract class MixinNetworkComponentNegotiator {
     @Redirect(

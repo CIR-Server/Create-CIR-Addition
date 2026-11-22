@@ -9,8 +9,10 @@ import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
 import net.neoforged.neoforge.common.ModConfigSpec.Builder;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 import net.neoforged.neoforge.common.ModConfigSpec.DoubleValue;
 import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
+import java.util.List;
 
 @EventBusSubscriber(
    modid = "create_cir_addition",
@@ -134,6 +136,61 @@ public class CirConfig {
          "Internal. AE2 vibrationChamber.baseMaxEnergyPerGameTick captured on the first tier change."
       )
       .defineInRange("ae2VibrationMaxSnapshot", 40, 1, 1000);
+   // ---- PERFECT 彩虹名字的物品列表 ----
+   // 默认留空：物品 ID 不写死在代码里，由服主/玩家自己填（形如 "namespace:path"）。
+   // 列表为空时，玩家登录会在聊天栏收到一条提示，提醒去配置文件编辑。
+   // 只在 Apotheosis + KubeJS 同时安装时生效；物品是否存在由运行期判定，
+   // 写错 ID 不会崩，只是不命中。
+   // 注意：列表配置只在启动时加载，/reload 不会刷新，必须重启游戏。
+   public static final ConfigValue<List<? extends String>> PERFECT_RAINBOW_ITEMS = BUILDER.comment(
+          "Item IDs whose display name is replaced with Apotheosis' PERFECT rainbow colour.",
+          "Empty by default - fill in your own IDs, e.g. \"minecraft:diamond\".",
+          "Only active when both Apotheosis and KubeJS are installed.",
+          "Loaded once at startup - a full game restart is required, /reload is not enough."
+       )
+       .defineListAllowEmpty(
+          List.of("perfectRainbowItems"),
+          List::of,
+          () -> "minecraft:stone",
+          o -> o instanceof String
+       );
+   // ---- CEI 宝石切割机限制 ----
+   // 语义：输入宝石处于该纯度时，是否允许用切割机升阶。
+   // 对应关系（输入纯度 → 产出）：
+   //   cracked   碎裂   → chipped   开裂
+   //   chipped   开裂   → flawed    有瑕
+   //   flawed    有瑕   → normal    正常
+   //   normal    正常   → flawless  无瑕
+   //   flawless  无瑕   → perfect   完美
+   //   perfect   完美   → 无更高阶，写了也没用
+   // 只在 Apotheosis + 附魔工业（CEI）同时安装时生效。
+   // 注意：截的是服务端判定，改完必须重启游戏；/reload 不会刷新。
+   public static final BooleanValue GEM_CUT_ALLOW_CRACKED = BUILDER.comment(
+          "Allow cutting a CRACKED gem on the CEI gem cutter (cracked -> chipped).",
+          "Only active when Apotheosis and Create Enchantment Industry are both installed.",
+          "Read once at startup - a full restart is required."
+       )
+       .define("gemCutAllowCracked", true);
+   public static final BooleanValue GEM_CUT_ALLOW_CHIPPED = BUILDER.comment(
+          "Allow cutting a CHIPPED gem on the CEI gem cutter (chipped -> flawed)."
+       )
+       .define("gemCutAllowChipped", true);
+   public static final BooleanValue GEM_CUT_ALLOW_FLAWED = BUILDER.comment(
+          "Allow cutting a FLAWED gem on the CEI gem cutter (flawed -> normal)."
+       )
+       .define("gemCutAllowFlawed", false);
+   public static final BooleanValue GEM_CUT_ALLOW_NORMAL = BUILDER.comment(
+          "Allow cutting a NORMAL gem on the CEI gem cutter (normal -> flawless)."
+       )
+       .define("gemCutAllowNormal", false);
+   public static final BooleanValue GEM_CUT_ALLOW_FLAWLESS = BUILDER.comment(
+          "Allow cutting a FLAWLESS gem on the CEI gem cutter (flawless -> perfect)."
+       )
+       .define("gemCutAllowFlawless", false);
+   public static final BooleanValue GEM_CUT_ALLOW_PERFECT = BUILDER.comment(
+          "Allow cutting a PERFECT gem on the CEI gem cutter. There is no tier above it."
+       )
+       .define("gemCutAllowPerfect", false);
    public static final ModConfigSpec SPEC = BUILDER.build();
 
    /** 配置文件对象，onLoad 时拿到，用于让 /cir 指令写回磁盘 */
@@ -147,6 +204,8 @@ public class CirConfig {
       config = event.getConfig();
       ModuleManager.setEnabled("network", (Boolean)NETWORK_ENABLED.get());
       ModuleManager.setEnabled("create", (Boolean)CREATE_ENABLED.get());
+      // 配置（重新）加载后丢掉彩虹名字的目标缓存，让下次访问重读列表
+      com.cirserver.createciraddition.compat.PerfectItemNames.invalidate();
       CreateCIRAddition.LOGGER.info("Create CIR Addition: Config loaded");
    }
 

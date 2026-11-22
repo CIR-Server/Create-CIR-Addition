@@ -14,6 +14,6 @@ public final class NetworkCompatibility {
     }
 
     private static boolean supported(String version) {
-        return "3.4.8".equals(version) || "3.4.7".equals(version);
+        return "3.5.0".equals(version);
     }
 }

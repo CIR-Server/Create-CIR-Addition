@@ -34,7 +34,7 @@ import org.apache.logging.log4j.Logger;
 @Mod("create_cir_addition")
 public class CreateCIRAddition {
    public static final String MOD_ID = "create_cir_addition";
-   public static final String VERSION = "3.4.8";
+   public static final String VERSION = "3.5.0";
    public static final Logger LOGGER = LogManager.getLogger();
 
    public CreateCIRAddition(IEventBus modEventBus, ModContainer modContainer) {
@@ -52,6 +52,7 @@ public class CreateCIRAddition {
    }
 
    private void setup(FMLCommonSetupEvent event) {
+      event.enqueueWork(com.cirserver.createciraddition.boss.BossCombatHandler::register);
       LOGGER.info("Create CIR Addition: Core Logic Ready. Targeting NeoForge 1.21.1 + Create 6.x");
    }
 
@@ -105,7 +106,7 @@ public class CreateCIRAddition {
          // 不加这个的话，专用服务器上客户端看不到桶里的东西，点一下就关窗。
          //
          // Keep this auxiliary channel optional. Required CIR channels negotiate
-         // protocol 3.4.8 and accept only 3.4.7 or 3.4.8 peers.
+         // protocol 3.5.0 and accept only 3.5.0 peers.
          registrar.optional().playToClient(
             com.cirserver.createciraddition.network.TrashBinSyncPayload.TYPE,
             com.cirserver.createciraddition.network.TrashBinSyncPayload.STREAM_CODEC,
