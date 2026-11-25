@@ -5,97 +5,25 @@
 [![Create](https://img.shields.io/badge/Create-6.x-blue)](https://modrinth.com/mod/create)
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey)](https://creativecommons.org/licenses/by-sa/4.0/)
 
-面向 **机械动力（Create）服务器**的优化与网络管理附属。
+面向机械动力整合包和服务器，提供性能优化、兼容修复、管理工具与可配置的模组联动。
 
-An optimization and network management add-on built for **Create-based servers**.
+Performance optimizations, compatibility fixes, administration tools and configurable integrations for Create-based modpacks and servers.
 
-**Language: English (US) /简体中文（中国大陆）/繁體中文（台灣）**
+[简体中文](#中文) | [English](#english)
 
-**未安装机械动力模组时无法使用本模组 Cannot work without CREATE mod**
-
-**中文** ｜ [English](#english)
+支持简体中文、繁体中文与英文 / Available in Simplified Chinese, Traditional Chinese and English.
 
 ---
 
 # 中文
 
-## 简介
+Create CIR Addition 最初为 CIR 服务器开发。功能分为机械动力优化、机械动力修复、新增功能与模组联动四部分。Create 是必需前置；联机时客户端和服务端都需要安装本模组。AE2、Apotheosis 等只在安装后启用对应功能。
 
-Create CIR Addition 是一个针对机械动力综合服务器的服务端附属，主要解决三件事：
+[机械动力优化](#机械动力优化) · [机械动力修复](#机械动力修复) · [新增功能](#新增功能) · [模组联动](#模组联动) · [注册指令](#注册指令) · [配置文件](#配置文件) · [前置与安装](#前置与安装)
 
-1. **性能** —— 减少 Create 方块实体和方块实体的网络同步与 tick 开销
-2. **规则** —— （可选）限制 AE2 量子环的过度堆叠，迫使玩家用物流网络而不是无脑并联；限制AE2本身的发电，迫使玩家使用CC&A的发电机基于应力发电
-3. **运维** —— MSPT 预警、应急扫地、垃圾桶找回等
+## 机械动力优化
 
-该模组每一项优化都对应一处具体的 Create 内部实现，每一个改动均为了方便服务器的构建和管理。绝大多数功能可以通过修改配置文件调节。
-
-## 3.5.0 — Boss 保护
-
-仅在安装 **Apotheosis** 时启用整套 Boss Guard，包括伤害限制、狂暴、回复和处决拦截；未安装时全部跳过。
-配置：`config/create_cir_addition-boss-guard.json`，按 `cataclysm`、`twilightforest`、`minecraft` 分组；未安装的组跳过。管理员用 `/cir bossguard reload` 原子重载，格式错误保留上一份配置。
-默认：单次最多最大生命的50%；低于半血时按当前生命10%限伤，最低伤害上限为15（原版Boss为20），小于等于15的攻击跳过低血规则。狂暴10秒免伤、攻击+10，结束后冷却20秒。半血首次触发回复40/60/80。
-处决按真实触发条件计数，在图腾消耗、死亡音效和清空生命之前拦截；第五次移除主手处决词条，保留其他词条和物品组件。`generic_kill` 管理员清理始终放行。
-**网络仅兼容3.5.0，客户端与服务器需一起升级；3.4.x不再兼容。** 本次只做离线验证及本地部署。
-
-## 修复记录
-
-**3.5.0 同版本实测修复：** 半血阶段不再被绿色狂暴、免伤或冷却跳过。先将真实伤害截断至恰好半血，再独立回复生命并刷新火焰狂暴。低血量下限在护甲、抗性和吸收之后执行；三语提示明确说明无敌。版本／协议均保持 3.5.0，缺少神化时所有 Boss 保护继续关闭。
-
-### 3.4.8 — 吞吐量检测兼容修复与条件补丁
-
-- 修复 RollingGate `1.1.0+build.66` 加载配置时从后台线程修改 GLFW 窗口属性造成的启动卡死；更新被非阻塞地调度到游戏主线程。此补丁只对对应版本的客户端启用，不加载到专用服务器。
-- 修复 ThroughputQuest 1.0.0 对 AdvancedAE 私有 Mixin 访问器的调用：改用 AE2 的公开 getter，覆盖服务端检测与客户端渲染。仅检测到 `throughput_quest` 和 `ae2` 时启用；不需要修改第三方 JAR。
-- 工作盆被拆除时的动力冲压机空粒子修复仅对 **Create 6.0.10** 启用。其他版本自动跳过此补丁，其他工作盆优化保持原有行为。
-- CIR 网络协议升级为 **3.4.8**。新版服务器接受协议 **3.4.7、3.4.8**，拒绝更早或未知协议；其他模组的协商不变。新版客户端连接旧版服务器时仍受旧服务器的严格检查限制。`3.4.7fix` 使用协议 `3.4.7`，属于兼容范围。
-- 补齐 AE2 发电控制、强制清扫和开关状态的三语翻译。
-
-#### 自动检测与启用范围
-
-兼容补丁在启动时由 `CirMixinPlugin` 自动检测；不需要手动开启，也不会把可选模组变成必装依赖。
-
-工作盆空粒子补丁是临时兼容措施；Create 上游修复后可移除该项。这个说明不涉及 ThroughputQuest、RollingGate 等其他兼容修复。
-
-| 修复 | 自动启用条件 | 范围 |
-|---|---|---|
-| 动力冲压机空物品粒子 / 拆除工作盆时掉线 | Create 版本号**严格等于 `6.0.10`** | 其他 Create 版本跳过这一补丁；不影响原有工作盆及其他 Create 优化 |
-| ThroughputQuest 旧访问器兼容 | 同时安装 `throughput_quest` 和 `ae2` | 修复服务端检测及客户端渲染；针对 1.0.0 实测通过，仅替换明确匹配的旧调用，新版本没有这些调用时不作替换 |
-| RollingGate 窗口设置导致启动卡死 | **客户端**安装 `rolling_gate`，版本号**严格等于 `1.1.0+build.66`** | 将窗口属性修改交给游戏主线程；专用服务器不加载该补丁 |
-
-缺少对应模组或不满足版本条件时，相关补丁自动跳过。ThroughputQuest 使用的是“安装检测＋旧调用匹配”，不是把所有版本的模组逻辑整体覆盖。日志会记录各项条件补丁是否启用。
-
-### 3.4.7fix — 工作盆被拆除导致的客户端网络错误
-
-动力冲压机在**工作盆**上运行的瞬间，如果下方工作盆被拆除，服务端会把一个**数量为 0 的物品**写进方块实体的粒子同步包。客户端解析出来是空物品栈，创建粒子时抛出：
-
-```
-java.lang.IllegalArgumentException: Empty stacks are not allowed
-```
-
-表现是客户端直接弹出「网络协议错误」并掉线。该问题在 3.4.7fix 中修复：创建粒子前先把空物品栈从粒子列表里剔除，避免将其用于粒子构造。
-
-> 历史版本 3.4.7fix 的网络通道协商版本为 `3.4.7`，旧客户端可正常连接，模组列表显示版本为 `3.4.7fix`。
-
-## 功能
-
-### Boss 防爆发保护
-
-仅在安装 **Apotheosis** 时启用，缺少该模组时整套功能不注册。
-
-| 规则 | 行为 |
-|---|---|
-| 单次伤害上限 | 不超过最大生命 × 50% |
-| 低血量保护 | 血量低于 50% 时，单次扣血 ≤ `max(当前生命 × 10%, 组下限)`；输入 ≤15 的攻击跳过低血规则 |
-| 过量反制 | 单次伤害超过最大生命时取消伤害，扣掉当前血量一半并进入狂暴 |
-| 半血强制 | 首次跌破 50% 必定触发，按初始最大生命回复 40 / 60 / 80 |
-| 爆发狂暴 | 玩家单次伤害 > 100 触发 |
-
-狂暴持续 10 秒，期间免疫一切伤害、攻击力 +10；结束后冷却 20 秒。粒子按触发时机区分颜色：半血阶段为火焰，其余为绿色。
-
-处决拦截：神话的处决词缀对受保护 Boss 无效，拦截发生在图腾检查和死亡音效之前。同一玩家被拦 5 次后，移除其主手武器的处决词条并全服播报。
-
-管理员 `/kill` 与 `generic_kill` 始终放行。
-
-### 机械动力机械运行优化
+### 机械运行与库存同步
 
 | 目标 | 优化内容 |
 |---|---|
@@ -107,7 +35,7 @@ java.lang.IllegalArgumentException: Empty stacks are not allowed
 | `BasinBlockEntity` | 工作盆溢出检查间隔 |
 | `FunnelBlockEntity` | 漏斗 tick 优化 |
 
-以上间隔全部可配置，默认值经过实测。
+相关间隔可配置；调大间隔会影响更新频率，请结合实际机器规模调整。
 
 ### 红石信号终端优化
 
@@ -123,7 +51,101 @@ Create 的 `RedstoneLinkNetworkHandler.updateNetworkOf` 每次被调用都要遍
 
 客户端与服务端之间的 Create 同步包会按大小自动选择 LZ4 或 Zstd 压缩，小包直接放行避免因压缩反而变大。
 
-### （可选）量子环限制
+## 机械动力修复
+
+### 动力冲压机与工作盆空粒子修复
+
+动力冲压机运行时，如果下方工作盆恰好被拆除，同步数据可能包含数量为 0 的物品。客户端用空物品创建粒子时会抛出：
+
+```text
+java.lang.IllegalArgumentException: Empty stacks are not allowed
+```
+
+玩家看到的通常是“网络协议错误”并掉线。补丁会在创建粒子前过滤空物品。
+
+**仅当 Create 版本严格等于 `6.0.10` 时启用。** 其他 Create 版本自动跳过该修复，不影响上一节中的其他优化。该项最初加入于 3.4.7fix，在 3.4.8 起加入版本检测；上游修复后可移除这一临时补丁。
+
+## 新增功能
+
+### MSPT 预警
+
+每 30 秒采样一次服务器 MSPT，四档：**40 / 45 / 50 / 70**（颜色：白 → 黄 → 金 → 红）。
+
+**读到超线不会立刻报，要等 3 秒复检一次。**
+
+- 第二次仍在**同一档位或更高** → 根据第二次的读数和档位触发全局播报
+- 第二次数值下降 → 保持完全静默
+
+重复确认为避免自动保存或偶然的卡顿误触报警的操作，只有持续性负载才会报出来。
+
+`≥ 70` 时每次确认都会触发广播，直到mspt不再高于该值。
+
+> 前两档仍有每 tick 余量，50 MSPT 刚好占满维持 20 TPS 的预算，这些档位用于告知负载趋势。70MSPT已经可以导致明显可见的卡顿。
+
+### 清扫与垃圾桶
+
+**没有定时扫地。** 触发方式只有两种：
+
+- MSPT ≥ 70（红色档位确认后）自动触发清理
+- 管理员执行扫地命令 `/cir cleanup`，或使用MCDR，KubeJS等外部包装方法间接执行该指令
+
+普通清理收集的物品会进入垃圾桶，**有效期 1 小时**。玩家用 `/cir trashBin` 或点击聊天栏的垃圾桶文字提示打开界面取回。
+
+手动执行 `/cir cleanup` 时，这条提示会全服广播，附带可点击的「打开垃圾桶」按钮。
+
+带自定义名称的物品默认受保护（可在配置里关闭）。
+
+#### 常规清扫会跳过哪些东西
+
+为了避免垃圾桶在编码物品时造成客户端被踢下线，下列物品**不会被清理**，留在地面等玩家自行拾取：
+
+| 跳过 | 原因 |
+|---|---|
+| 所有旗帜 | 图案是静态注册表条目，两端未必一致 |
+| 17 种原版潜影盒 | 内部物品表随物品走 |
+| **不可堆叠且带附魔的物品** | 避免重载后失效的附魔引用造成编码错误 |
+
+可堆叠的物品（石头、圆木这类）不做上述检查，直接清理。
+
+普通清理还会尝试编码准备放入垃圾桶的物品；编码失败的物品会被销毁并记录日志，因此不能保证所有被清理物品都能找回。
+
+#### 强制清扫 `/cir forceCleanup`
+
+常规清扫指令无法缓解服务器压力时的最终解决办法：
+
+- 全服播报 **20 / 10 / 5 / 3 / 2 / 1** 秒倒计时
+- 倒计时结束后**清空所有掉落物**
+
+**通过本方法清空的掉落物无法收入垃圾桶**
+
+清空完成后，全服广播「强制清扫执行完毕」（红色加粗）。
+
+### 兑换码系统
+
+面向公益服务器的非商业兑换码功能。所有兑换码对全体玩家开放，**每人每个码限兑一次**，不支持按人发放或一次性码。
+
+- `/cir giftCode` —— 打开兑换界面（无权限要求）
+- `/cir manageGiftCode` —— 打开管理界面，权限 4
+
+兑换码可配置物品、经验值和状态效果。管理界面支持新建、作废、删除；作废后视同过期，删除会连同兑换记录一起清掉。
+
+配置保存在 `config/create_cir_addition/gift_codes.json`，首次运行自动生成。兑换记录存在世界存档里。
+
+两个界面打开前都会先弹出免责声明，说明本系统不支持任何商业性质的兑换码。
+
+
+
+### 公共基地坐标
+
+首次进入新地图时，世界出生点被自动设为基地。可用 `/cir setHome` 更改（需要管理员权限）。
+
+**全世界只有一个基地**，只在主世界生效，同维度才有豁免。
+
+## 模组联动
+
+### AE2 限制与发电管理
+
+#### 量子环数量与密度限制
 
 > 需要 AE2。没装的话整个功能跳过，其他功能不受影响。
 
@@ -147,7 +169,7 @@ Create 的 `RedstoneLinkNetworkHandler.updateNetworkOf` 每次被调用都要遍
 
 P.S. 为防止玩家使用活塞，实体方块化等方式绕开方块放置检测创建量子环，本mod采用的方案为检测到量子环成型（未被加载的量子环被加载时也会被判定为多方块成型）后对照已被扫描的量子环清单决定该量子环是否触发提示或拆除。
 
-### （可选）AE2 发电机调节
+#### 发电机调节
 
 > 需要 AE2。没装的话指令会提示「未检测到 AE2」，其他功能不受影响。
 
@@ -176,97 +198,58 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 
 > 数值写于 AE2 的 `ae2-common.toml` ，所以这条调节是**全局**的 —— 一台机器切档，全服所有谐振仓都会更新配置。
 
-### 基地系统
+### BOSS 防秒杀保护（需要 Apotheosis）
 
-首次进入新地图时，世界出生点被自动设为基地。可用 `/cir setHome` 更改（需要管理员权限）。
+仅在安装 **Apotheosis** 时启用，缺少该模组时整套功能不注册。
 
-**全世界只有一个基地**，只在主世界生效，同维度才有豁免。
-
-### MSPT 预警
-
-每 30 秒采样一次服务器 MSPT，四档：**40 / 45 / 50 / 70**（颜色：白 → 黄 → 金 → 红）。
-
-**读到超线不会立刻报，要等 3 秒复检一次。**
-
-- 第二次仍在**同一档位或更高** → 根据第二次的读数和档位触发全局播报
-- 第二次数值下降 → 保持完全静默
-
-重复确认为避免自动保存或偶然的卡顿误触报警的操作，只有持续性负载才会报出来。
-
-`≥ 70` 时每次确认都会触发广播，直到mspt不再高于该值。
-
-> 前三档处于「每 tick 有余量」的范围内（50 MSPT刚好占满 20 TPS），其作用为提前告知趋势。70MSPT已经可以导致明显可见的卡顿。
-
-### 扫地功能与垃圾桶
-
-**没有定时扫地。** 触发方式只有两种：
-
-- MSPT ≥ 70（红色档位确认后）自动触发清理
-- 管理员执行扫地命令 `/cir cleanup`，或使用MCDR，KubeJS等外部包装方法间接执行该指令
-
-被清理的物品**不会消失**，而是进垃圾桶，**有效期 1 小时**。玩家用 `/cir trashBin` 或点击聊天栏的垃圾桶文字提示打开界面取回。
-
-手动执行 `/cir cleanup` 时，这条提示会全服广播，附带可点击的「打开垃圾桶」按钮。
-
-带自定义名称的物品默认受保护（可在配置里关闭）。
-
-#### 常规清扫会跳过哪些东西
-
-为了避免垃圾桶在编码物品时造成客户端被踢下线，下列物品**不会被清理**，留在地面等玩家自行拾取：
-
-| 跳过 | 原因 |
+| 规则 | 行为 |
 |---|---|
-| 所有旗帜 | 图案是静态注册表条目，两端未必一致 |
-| 17 种原版潜影盒 | 内部物品表随物品走 |
-| **任何带附魔的物品** | 数据包重载后旧附魔引用会失效，编码时找不到 id |
+| 单次伤害上限 | 不超过最大生命 × 50% |
+| 低血量保护 | 低于半血时，将真实扣血限制在按当前生命比例与分组下限计算的区间；原始伤害 ≤15 的攻击跳过此规则 |
+| 过量反制 | 单次伤害超过最大生命时取消伤害，扣掉当前血量一半并进入狂暴 |
+| 半血强制 | 首次会从半血以上降至 50% 或以下时，先把实际扣血截断到恰好半血，再回复 40 / 60 / 80 并进入火焰狂暴 |
+| 爆发狂暴 | 玩家单次伤害 > 100 触发 |
 
-可堆叠的物品（石头、圆木这类）不做上述检查，直接清理。
+默认保护原版、灾变与暮色森林的指定 BOSS；按 `minecraft`、`cataclysm`、`twilightforest` 分组，未安装对应模组时跳过该组。
 
-因此，常规清扫**只放过带数据的物品**，其余全部清走。
+默认低血量比例为当前生命的 10%，分组下限为 15（原版 BOSS 为 20），在护甲、抗性、附魔和吸收之后处理；弱输入不会被抬高，原本不致命的攻击也不会仅因下限补足而击杀。半血阶段每只 BOSS 只触发一次，优先于已有狂暴免伤、冷却及其他爆发规则。回血量按初始最大生命分为 40 / 60 / 80，回血后生命可以高于 50%。
 
-#### 强制清扫 `/cir forceCleanup`
+狂暴持续 10 秒，期间免疫一切伤害、攻击力 +10；结束后冷却 20 秒。粒子按触发时机区分颜色：半血阶段为火焰，其余为绿色。
 
-常规清扫指令无法缓解服务器压力时的最终解决办法：
+处决拦截：神化的处决词缀对受保护 Boss 无效，拦截发生在图腾检查和死亡音效之前。同一玩家被拦 5 次后，移除其主手武器的处决词条并全服播报。
 
-- 全服播报 **20 / 10 / 5 / 3 / 2 / 1** 秒倒计时
-- 倒计时结束后**清空所有掉落物**
+管理员 `/kill` 与 `generic_kill` 始终放行。
 
-**通过本方法清空的掉落物无法收入垃圾桶**
+### 宝石切割与物品名称联动
 
-清空完成后，全服广播「强制清扫执行完毕」（红色加粗）。
+- **宝石切割器**：需要神化（Apotheosis）与机械动力：附魔工业（Create Enchantment Industry）。按输入宝石的纯度决定是否允许切割升阶；默认允许“碎裂 → 开裂 → 有瑕”，不再允许从有瑕继续切割到更高纯度。
+- **彩虹名称**：需要 Apotheosis 与 KubeJS。可在配置的 `perfectRainbowItems` 列表中指定物品，让名称使用神化的 PERFECT 彩虹颜色；默认列表为空，目标物品不存在或取色失败时保留原名称。
 
-### 兑换码系统
+本模组只提供切割限制和名称显示，不附带 CIR 整合包的 KubeJS 宝石配方；需要其他升级路线时应自行编写配方。
 
-面向公益服务器的非商业兑换码功能。所有兑换码对全体玩家开放，**每人每个码限兑一次**，不支持按人发放或一次性码。
+### 其他模组兼容性修复
 
-- `/cir giftCode` —— 打开兑换界面（无权限要求）
-- `/cir manageGiftCode` —— 打开管理界面，权限 4
+相关补丁在启动时检查对应模组及版本；缺少依赖或不符合条件时，在解析目标类之前跳过。启动日志会记录检测结果，可选模组不会变成必装前置。
 
-兑换码可配置物品、经验值和状态效果。管理界面支持新建、作废、删除；作废后视同过期，删除会连同兑换记录一起清掉。
-
-配置保存在 `config/create_cir_addition/gift_codes.json`，首次运行自动生成。兑换记录存在世界存档里。
-
-两个界面打开前都会先弹出免责声明，说明本系统不支持任何商业性质的兑换码。
-
-> 依据 Mojang 商业使用指南，服务器不得销售影响游戏平衡的内容。CIR 团队不支持一切商业性质的兑换码行为。
-
-## 前置
-
-| 依赖 | 必需性 | 版本 |
+| 修复 | 自动启用条件 | 作用范围 |
 |---|---|---|
-| Minecraft | **必需** | 1.21.1 |
-| NeoForge | **必需** | 21.1+ |
-| Create | **必需** | 6.0.0 – 6.x |
-| AE2 | 可选 | 19+（不装则量子环限制和发电机调节都跳过） |
+| ME 吞吐量检测任务（ThroughputQuest）旧访问器异常 | 同时安装 `throughput_quest` 与 `ae2` | 修复服务端检测与客户端渲染；针对 1.0.0 的旧调用验证，只替换明确匹配的访问器调用，新版没有这些调用时不替换 |
+| 卷帘门（RollingGate）加载配置时卡死 | **客户端**的 `rolling_gate` 版本严格为 **`1.1.0+build.66`** | 将窗口属性更新交给游戏主线程，避免加载线程调用窗口接口；专用服务器不加载此补丁 |
 
-## 安装
+ThroughputQuest 补丁用 AE2 公开 getter 替换已移除的 AdvancedAE 私有访问器调用，不需要修改第三方 JAR，也不整体替换其他版本的模组逻辑。
 
-1. 下载 `create_cir_addition-3.x.x.jar`
-2. 放进 `mods/` 目录（若为服务器，客户端和服务端都要放！）
-3. 启动一次，生成 `config/create_cir_addition.toml`
-4. 按需调整配置，改完 `/reload` 或重启
+#### 库存桥接优化（3.5.0fix，尚未发布）
 
-## 命令
+仅当 Create: AE2 Stock Bridge（`createstockbridge`）版本严格为 **0.2.0**，且安装 Create 与 AE2 时启用。
+
+- 为每个桥接器缓存远程物品键，真实预约扣减后使缓存失效。
+- 库存轮询结果未变化时，跳过重复重新挂载。
+- 保留上游 20 tick 轮询、请求处理，以及优先级和在线状态变化触发的重新挂载。
+- 同时遵循 `stockBridgeOptimization` 与 `create` 配置开关。
+
+**这项修复仅需服务端更新，已有 3.5.0 客户端可继续使用；客户端仍须安装 CIR Addition。** 此本地修复构建已通过编译及离线缓存、字节码、协议与 BOSS 回归检查，尚未进行实际游戏中的 Mixin 合成验证或服务器 MSPT 对比。公开的 3.5.0 发行包不包含此修复。
+
+## 注册指令
 
 所有命令在 `/cir` 下。
 
@@ -288,9 +271,9 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 | `/cir ae2Generator vibrationChamber <low\|normal\|boost>` | 4 | 切换谐振仓档位（Tab 补全） |
 | `/cir bossguard reload` | 2 | 原子重载 Boss Guard 配置；格式错误时保留上一份 |
 
-## 配置
+## 配置文件
 
-配置文件：`config/create_cir_addition.toml`
+主配置：`config/create_cir_addition.toml`。下面按功能顺序列出常用项目；具体默认值和全部项目以运行后生成的配置为准。
 
 ### 模块开关
 
@@ -298,6 +281,52 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 network = true    # 网络压缩
 create  = true    # Create 优化 mixin 总开关
 ```
+
+### 性能
+
+```toml
+smartBlockInterval = 3
+chainConveyorInterval = 2
+basinCheckInterval = 5
+mountedStorageSyncCooldown = 20
+```
+
+### 红石终端
+
+```toml
+redstoneLinkOptimization = true    # 支持 /cir 指令热切换
+```
+
+### 扫地
+
+```toml
+cleanupIgnoreNamed = true     # 保护带自定义名称的物品
+cleanupOnHighMspt = true      # MSPT 到红色档（≥ 70）时自动清理
+```
+
+### 预警
+
+```toml
+msptWarnEnabled = true
+```
+
+### 量子环
+
+```toml
+quantumLimitNear = 2
+quantumRadiusNear = 1024
+quantumLimitFar = 4
+quantumRadiusFar = 4096
+otherDimensionLimit = 4
+homeRadius = 256
+quantumLimiterEnabled = true    # 总开关，改这个必须重启
+```
+
+> **`quantumLimiterEnabled` 只在服务器启动时读取一次。**
+>
+> `/reload` 和配置热重载都会刻意忽略它。因为限制依赖一张持久化登记表，运行中途切换会让表内内容和游戏对不上：关掉时表还在（重新打开会把老记录当有效量子环），打开时现有量子环全部未登记（下次区块加载会被当新桥判一遍）。
+>
+> 要改必须重启游戏。
 
 ### Boss 防爆发保护
 
@@ -335,58 +364,74 @@ create  = true    # Create 优化 mixin 总开关
 - `lowHealthMinDamage` 可逐组配置，默认 minecraft 组 20，其余 15。
 - 改完执行 `/cir bossguard reload`，不需要重启。
 
-### 性能
+### 宝石切割与彩虹名称
 
 ```toml
-smartBlockInterval = 3
-chainConveyorInterval = 2
-basinCheckInterval = 5
-mountedStorageSyncCooldown = 20
+# 判断输入纯度，true 只是放行原有加工规则
+gemCutAllowCracked = true
+gemCutAllowChipped = true
+gemCutAllowFlawed = false
+gemCutAllowNormal = false
+gemCutAllowFlawless = false
+gemCutAllowPerfect = false
+
+# 默认空列表，按需填写实际存在的物品 ID
+perfectRainbowItems = []
 ```
 
-### 量子环
+切割限制需要 Apotheosis + Create Enchantment Industry；彩虹名称需要 Apotheosis + KubeJS。修改这些配置后重启游戏。
+
+### 库存桥接优化（未发布的 3.5.0fix 修复构建）
 
 ```toml
-quantumLimitNear = 2
-quantumRadiusNear = 1024
-quantumLimitFar = 4
-quantumRadiusFar = 4096
-otherDimensionLimit = 4
-homeRadius = 256
-quantumLimiterEnabled = true    # 总开关，改这个必须重启
+stockBridgeOptimization = true
 ```
 
-> **`quantumLimiterEnabled` 只在服务器启动时读取一次。**
->
-> `/reload` 和配置热重载都会刻意忽略它。因为限制依赖一张持久化登记表，运行中途切换会让表内内容和游戏对不上：关掉时表还在（重新打开会把老记录当有效量子环），打开时现有量子环全部未登记（下次区块加载会被当新桥判一遍）。
->
-> 要改必须重启游戏。
+仅在 Stock Bridge 版本严格为 0.2.0 且安装 Create、AE2 时生效，同时遵循 `create` 总开关。公开的 3.5.0 发行包不包含此项。
 
-### 红石终端
+### 兑换码数据
 
-```toml
-redstoneLinkOptimization = true    # 支持 /cir 指令热切换
-```
+文件：`config/create_cir_addition/gift_codes.json`。首次使用时生成，兑换记录保存在世界存档中，日常管理可使用游戏内界面。
 
-### 扫地
+## 前置与安装
 
-```toml
-cleanupIgnoreNamed = true     # 保护带自定义名称的物品
-cleanupOnHighMspt = true      # MSPT 到红色档（≥ 70）时自动清理
-```
+| 依赖 | 必需性 | 版本 |
+|---|---|---|
+| Minecraft | **必需** | 1.21.1 |
+| NeoForge | **必需** | 21.1+ |
+| Create | **必需** | 6.0.0 – 6.x |
+| AE2 | 可选 | 19+（不装则量子环限制和发电机调节都跳过） |
+| Apotheosis | 可选 | BOSS 保护及相关宝石联动所需 |
+| Create Enchantment Industry / KubeJS | 可选 | 分别用于宝石切割限制 / 彩虹名称 |
+| ThroughputQuest / RollingGate | 可选 | 仅对下述兼容范围启用修复 |
 
-### 预警
+### 安装步骤
 
-```toml
-msptWarnEnabled = true
-```
+1. 从[发行页面](https://github.com/CIR-Server/Create-CIR-Addition/releases)下载需要的版本，放入 `mods/`；联机时客户端和服务端都需要安装本模组。
+2. 启动一次，生成主配置；安装 Apotheosis 时还会生成独立 BOSS 配置。
+3. 按需调整配置。BOSS 配置可用 `/cir bossguard reload` 重载；启动时读取的项目必须重启，不能统一用 `/reload` 代替。
 
-## 迁移提示
+AE2、Apotheosis 等属于可选联动，不会因本模组变成必装项。
+
+## 升级与版本兼容
+
+| 构建 | 网络协议 | 联机要求 |
+|---|---|---|
+| 3.5.0（当前公开发行版） | `3.5.0` | 客户端与服务端都需要 CIR Addition 3.5.0；不接受 3.4.x 或其他协议 |
+| 3.5.0fix（尚未发布的本地修复构建） | `3.5.0` | 沿用原有数据包与编解码，服务端可接受已有 3.5.0 客户端；不接受 3.4.x |
+
+3.5.0fix 只增加库存桥接修复，并没有把整个模组改成“客户端可选”。由 3.4.x 升级到 3.5.0 协议时仍需同时升级客户端和服务端。
+
+### 量子环登记迁移
 
 从旧版本升级时：
 
 - **老的量子环不会自动登记**。升级后进游戏跑一次 `/cir quantum scan`，把现有环补进表里，否则它们会被当成新桥重新判定一遍
 - 如果你的存档里有大量量子环且已超出当前限制，**建议先跑 scan 再改限制值**
+
+## 更新记录
+
+README 按功能组织，逐版本的改动集中在 [CHANGELOG.md](CHANGELOG.md)；下载见[发行页面](https://github.com/CIR-Server/Create-CIR-Addition/releases)。3.4.7 / 3.4.8 等旧网络协商规则仅适用于对应历史版本，不适用于当前 3.5.0 协议。
 
 ## AI 使用披露
 
@@ -412,82 +457,13 @@ msptWarnEnabled = true
 
 # English
 
-### 3.5.0 — Boss Guard
+Create CIR Addition was originally developed for the CIR server. Features are grouped into Create optimization, Create fixes, new features and mod integrations. Create is required, and multiplayer needs CIR Addition on both client and server. AE2, Apotheosis and other integrations activate only when their required mods are installed.
 
-Unreleased build correction: the one-time half-health phase takes priority over active berserk and cooldown. Final HP damage stops exactly at 50%, then the configured heal is applied. The floor is enforced after armor/resistance/absorption. Both messages explicitly state invincibility. Version and protocol remain 3.5.0.
+[Create optimization](#create-optimization) · [Create fixes](#create-fixes) · [New features](#new-features) · [Mod integrations](#mod-integrations) · [Commands](#commands) · [Configuration](#configuration) · [Requirements and installation](#requirements-and-installation)
 
-The entire Boss Guard module requires **Apotheosis**. Without it, caps, berserk, healing, particles and execution blocking are all disabled. Configured entity groups also require their owning mods. Edit `config/create_cir_addition-boss-guard.json` and run `/cir bossguard reload`; invalid edits retain the previous policy. Berserk lasts 10 seconds followed by a 20-second cooldown. Eligible executions are intercepted before totem use, death sound and health mutation; the fifth blocked attempt removes only the main-hand executing affix. Administrator `generic_kill` bypasses protection.
+## Create optimization
 
-**Only protocol 3.5.0 is accepted; client and server must match.** Previous 3.4.x versions are incompatible. This build has compilation/offline checks only; no game was launched or remote server deployed.
-
-
-## Overview
-
-Create CIR Addition is a server-side add-on for Create-focused modpacks. It covers three areas:
-
-1. **Performance** — reduces the network sync and tick overhead of Create's block entities
-2. **Rules** — (optional) caps how densely AE2 quantum rings can be stacked, pushing players toward a proper logistics network instead of brute-force parallel bridges; and throttles AE2's own power generation so players fall back on CC&A stress-based generation
-3. **Operations** — MSPT warnings, emergency item cleanup, trash bin recovery
-
-Each optimization maps to a specific piece of Create's internals, and every change exists to make a server easier to build and run. Nearly all of it is tunable through the config file.
-
-## Fixes
-
-### 3.4.8 — ThroughputQuest compatibility and conditional patches
-
-- Fix a startup hang in RollingGate `1.1.0+build.66` by dispatching GLFW window updates from the configuration-loading worker to the game thread without blocking loading. This patch is client-only and version-gated; dedicated servers do not load it.
-- Replace ThroughputQuest 1.0.0's calls to AdvancedAE's removed private mixin accessor with AE2 public getters, covering server watchers and client rendering. Enabled only when both `throughput_quest` and `ae2` are installed; no third-party JAR changes are needed.
-- Enable the empty press-particle fix only for **Create 6.0.10**. Other Create versions skip this fix; existing basin optimizations retain their behavior.
-- Upgrade the CIR payload protocol to **3.4.8**. Updated servers accept **3.4.7 and 3.4.8** only. Older and unknown protocols are rejected, and other mods retain their original negotiation rules. Updated clients still cannot bypass strict negotiation on an older server. `3.4.7fix` uses protocol `3.4.7` and is accepted.
-- Complete the English, Simplified Chinese and Traditional Chinese translations for AE2 generation controls, forced cleanup and toggle states.
-
-#### Automatic detection and activation
-
-`CirMixinPlugin` checks these compatibility patches at startup. No manual switch is needed, and optional integrations do not become required dependencies.
-
-The empty basin/press-particle patch is a temporary workaround and can be removed after Create fixes the upstream bug. This does not apply to the separate ThroughputQuest or RollingGate compatibility fixes.
-
-| Fix | Activation condition | Scope |
-|---|---|---|
-| Empty mechanical-press particles / disconnect when a basin is removed | The installed Create version is **exactly `6.0.10`** | Other Create versions skip this patch; existing basin and other Create optimizations remain unchanged |
-| ThroughputQuest legacy accessor compatibility | Both `throughput_quest` and `ae2` are installed | Covers server detection and client rendering; tested with 1.0.0. Only explicitly matched legacy calls are rewritten, so newer versions without those calls are left untouched |
-| RollingGate window-setting startup hang | A **client** has `rolling_gate` version **exactly `1.1.0+build.66`** | Dispatches window attribute updates to the game thread; dedicated servers do not load this patch |
-
-Missing mods or unmatched versions cause the corresponding patch to be skipped automatically. ThroughputQuest uses mod-presence checks plus exact legacy-call matching rather than replacing the behavior of every version. Startup logs report whether each conditional patch is enabled.
-
-### 3.4.7fix — client network error when a basin is broken mid-press
-
-If the basin under a mechanical press is destroyed at the exact moment the press runs, the server writes an item stack with **count 0** into the block entity's particle sync packet. The client parses it as an empty stack and throws:
-
-```
-java.lang.IllegalArgumentException: Empty stacks are not allowed
-```
-
-which shows up as a "network protocol error" disconnect. Fixed in 3.4.7fix: empty stacks are stripped from the particle list before constructing particles.
-
-> Historical release 3.4.7fix uses payload channel version `3.4.7`, so older clients can still connect; the mod list shows `3.4.7fix`.
-
-## Features
-
-### Boss Guard
-
-Requires **Apotheosis**; the entire module is skipped when it is absent.
-
-| Rule | Behaviour |
-|---|---|
-| Per-hit cap | No more than 50% of max health |
-| Low-health protection | Below half health, a hit removes at most `max(current HP × 10%, group floor)`; hits ≤15 skip the rule |
-| Overkill response | Damage above max health is cancelled, halves current HP and triggers berserk |
-| Half-health phase | The first crossing of 50% always fires; heals 40 / 60 / 80 by initial max health |
-| Burst berserk | A single player hit above 100 triggers it |
-
-Berserk lasts 10 seconds with full damage immunity and +10 attack; a 20-second cooldown follows. Particle colour depends on the trigger: flame for the half-health phase, green otherwise.
-
-Execution blocking: Apotheosis execution affixes cannot kill protected bosses; the block happens before totem checks and the death sound. Five blocked attempts strip the executing affix from the main-hand item and broadcast server-wide.
-
-Administrator `/kill` and `generic_kill` always bypass protection.
-
-### Create machinery tick optimization
+### Machinery ticks and storage synchronization
 
 | Target | What it does |
 |---|---|
@@ -499,7 +475,7 @@ Administrator `/kill` and `generic_kill` always bypass protection.
 | `BasinBlockEntity` | Basin overflow check interval |
 | `FunnelBlockEntity` | Funnel tick optimization |
 
-All intervals are configurable; the defaults are values measured in practice.
+The intervals are configurable. Increasing them changes update frequency, so tune them for the machinery in your world.
 
 ### Redstone link optimization
 
@@ -515,7 +491,101 @@ Toggle at runtime with `/cir redstoneLinkOptimization true|false`.
 
 Create sync packets between client and server pick LZ4 or Zstd by size. Small packets pass through untouched, so compression cannot make them larger.
 
-### Quantum ring limiter (optional)
+## Create fixes
+
+### Empty mechanical-press / basin particles
+
+If the basin beneath a running press is removed at the wrong moment, its sync data can contain an item with count 0. Building particles from that empty stack throws:
+
+```text
+java.lang.IllegalArgumentException: Empty stacks are not allowed
+```
+
+Players typically see a "network protocol error" disconnect. The patch filters empty stacks before creating particles.
+
+**Enabled only when Create is exactly `6.0.10`.** Other Create versions skip this fix without changing the optimizations above. Introduced in 3.4.7fix and version-gated since 3.4.8, it is a temporary workaround that can be removed after the upstream bug is fixed.
+
+## New features
+
+### MSPT warnings
+
+Samples server MSPT every 30 seconds, four tiers: **40 / 45 / 50 / 70** (white → yellow → gold → red).
+
+**A reading above the line does not broadcast immediately** — it waits 3 seconds and samples again:
+
+- Second reading still in the **same tier or higher** → broadcast using the second reading's value and tier
+- Second reading fell back → complete silence
+
+The repeat sample exists so that an autosave or an incidental hitch does not trip the alarm; only sustained load gets reported.
+
+At `≥ 70` every confirmed reading broadcasts until MSPT drops back below it.
+
+> The first two tiers still leave headroom within the tick budget; 50 MSPT uses the full budget for 20 TPS. These tiers surface the load trend. At 70 MSPT stutter is already plainly visible.
+
+### Item cleanup and trash bin
+
+**No timer-based cleanup.** Two triggers only:
+
+- Automatic, once MSPT reaches the red tier (≥ 70) and is confirmed
+- Manual, via `/cir cleanup`, or invoked indirectly through external wrappers such as MCDR or KubeJS
+
+Items collected by regular cleanup go into a trash bin valid for **1 hour**. Players reclaim them with `/cir trashBin`, or by clicking the trash-bin link in chat.
+
+When `/cir cleanup` is run manually, this message is broadcast to the whole server with a clickable trash bin button.
+
+Items carrying a custom name are protected by default (configurable).
+
+#### What the regular cleanup skips
+
+To avoid the trash bin getting a client kicked while encoding items, the following are **not cleaned up at all** — they stay on the ground for players to pick up themselves:
+
+| Skipped | Reason |
+|---|---|
+| All banners | Patterns are static registry entries that may differ between client and server |
+| The 17 vanilla shulker boxes | Their contents travel with the item |
+| **Non-stackable enchanted items** | Avoid encoding errors from stale enchantment references after a reload |
+
+Stackable items (stone, logs and the like) skip all these checks and are cleared directly.
+
+Regular cleanup also checks whether collected items can be encoded for the trash bin. An item that fails this check is destroyed and logged, so recovery is not guaranteed for every removed item.
+
+#### Force cleanup `/cir forceCleanup`
+
+The final recourse when the regular cleanup command can no longer relieve server load:
+
+- Broadcasts a countdown at **20 / 10 / 5 / 3 / 2 / 1** seconds
+- When it reaches zero, **every dropped item is cleared**
+
+**Dropped items cleared this way cannot be retrieved from the trash bin.**
+
+Once the clear is done, "Force cleanup complete." is broadcast to the whole server in bold red.
+
+### Gift code system
+
+A non-commercial gift code feature for community servers. Every code is open to all players and **can be redeemed once per player**; per-player or single-use codes are not supported.
+
+- `/cir giftCode` — open the redeem screen (no permission needed)
+- `/cir manageGiftCode` — open the management screen (permission 4)
+
+A code can grant items, experience and status effects. The management screen supports creating, disabling and deleting codes; a disabled code counts as expired, and deleting removes its redemption records too.
+
+Codes live in `config/create_cir_addition/gift_codes.json`, generated on first launch. Redemption records are stored in the world save.
+
+Both screens show a disclaimer first, stating that this system does not support gift codes of any commercial nature.
+
+
+
+### Shared base coordinates
+
+On first world load the spawn point becomes the base. Change it with `/cir setHome` (admin permission required).
+
+**There is exactly one base in the world.** It lives in the Overworld, and only rings in the same dimension benefit from the exemption.
+
+## Mod integrations
+
+### AE2 limits and generator management
+
+#### Quantum ring limits
 
 > Requires AE2. Without it the feature is skipped entirely; nothing else is affected.
 
@@ -539,7 +609,7 @@ Limits, the base exemption radius, and whether the feature is enabled at all are
 
 > **P.S.** To keep players from sidestepping placement detection with pistons, block-entity conversion or similar tricks, the mod does not hook block placement at all. It hooks the moment a ring multiblock *completes* — which also covers a ring that was loaded from an unloaded chunk — and then compares it against the scanned registry to decide whether it gets the notification or the axe.
 
-### AE2 power generator control (optional)
+#### Generator control
 
 > Requires AE2. Without it the command reports "AE2 not found"; nothing else is affected.
 
@@ -568,95 +638,56 @@ The baseline is snapshotted into `create_cir_addition.toml` (the `ae2Vibration*S
 
 > These values live in AE2's `ae2-common.toml`, so the adjustment is **global** — switching one tier updates every vibration chamber on the server.
 
-### Base system
+### Boss Guard (requires Apotheosis)
 
-On first world load the spawn point becomes the base. Change it with `/cir setHome` (admin permission required).
+Requires **Apotheosis**; the entire module is skipped when it is absent.
 
-**There is exactly one base in the world.** It lives in the Overworld, and only rings in the same dimension benefit from the exemption.
-
-### MSPT warnings
-
-Samples server MSPT every 30 seconds, four tiers: **40 / 45 / 50 / 70** (white → yellow → gold → red).
-
-**A reading above the line does not broadcast immediately** — it waits 3 seconds and samples again:
-
-- Second reading still in the **same tier or higher** → broadcast using the second reading's value and tier
-- Second reading fell back → complete silence
-
-The repeat sample exists so that an autosave or an incidental hitch does not trip the alarm; only sustained load gets reported.
-
-At `≥ 70` every confirmed reading broadcasts until MSPT drops back below it.
-
-> The first three tiers all sit inside "still has headroom per tick" territory (50 MSPT is exactly 20 TPS); their role is to surface a trend early. At 70 MSPT stutter is already plainly visible.
-
-### Item cleanup and trash bin
-
-**No timer-based cleanup.** Two triggers only:
-
-- Automatic, once MSPT reaches the red tier (≥ 70) and is confirmed
-- Manual, via `/cir cleanup`, or invoked indirectly through external wrappers such as MCDR or KubeJS
-
-Swept items are **not destroyed** — they go into a trash bin valid for **1 hour**. Players reclaim them with `/cir trashBin`, or by clicking the trash-bin link in chat.
-
-When `/cir cleanup` is run manually, this message is broadcast to the whole server with a clickable trash bin button.
-
-Items carrying a custom name are protected by default (configurable).
-
-#### What the regular cleanup skips
-
-To avoid the trash bin getting a client kicked while encoding items, the following are **not cleaned up at all** — they stay on the ground for players to pick up themselves:
-
-| Skipped | Reason |
+| Rule | Behaviour |
 |---|---|
-| All banners | Patterns are static registry entries that may differ between client and server |
-| The 17 vanilla shulker boxes | Their contents travel with the item |
-| **Anything enchanted** | After a datapack reload the old enchantment reference goes stale and cannot be encoded |
+| Per-hit cap | No more than 50% of max health |
+| Low-health protection | Below half health, final HP loss is bounded using current-health scaling and the group floor; raw hits ≤15 skip this rule |
+| Overkill response | Damage above max health is cancelled, halves current HP and triggers berserk |
+| Half-health phase | The first hit that would take the boss from at least half health to 50% or below stops final HP loss at exactly half health, then heals 40 / 60 / 80 and starts flame berserk |
+| Burst berserk | A single player hit above 100 triggers it |
 
-Stackable items (stone, logs and the like) skip all these checks and are cleared directly.
+Defaults cover selected vanilla, Cataclysm and Twilight Forest bosses, grouped under `minecraft`, `cataclysm` and `twilightforest`. A group is skipped when its owning mod is absent.
 
-As a result, the regular cleanup **only spares items that carry data**; everything else is taken.
+The default low-health ratio is 10% of current HP, with a group floor of 15 (20 for vanilla bosses), applied after armor, resistance, enchantments and absorption. Weak inputs are not inflated, and a non-finishing raw hit cannot become a floor-only kill. The once-per-boss half-health phase takes priority over active immunity, cooldown and other burst rules. Healing is 40 / 60 / 80 based on initial maximum HP, so final health may exceed 50%.
 
-#### Force cleanup `/cir forceCleanup`
+Berserk lasts 10 seconds with full damage immunity and +10 attack; a 20-second cooldown follows. Particle colour depends on the trigger: flame for the half-health phase, green otherwise.
 
-The final recourse when the regular cleanup command can no longer relieve server load:
+Execution blocking: Apotheosis execution affixes cannot kill protected bosses; the block happens before totem checks and the death sound. Five blocked attempts strip the executing affix from the main-hand item and broadcast server-wide.
 
-- Broadcasts a countdown at **20 / 10 / 5 / 3 / 2 / 1** seconds
-- When it reaches zero, **every dropped item is cleared**
+Administrator `/kill` and `generic_kill` always bypass protection.
 
-**Dropped items cleared this way cannot be retrieved from the trash bin.**
+### Gem cutting and item-name integrations
 
-Once the clear is done, "Force cleanup complete." is broadcast to the whole server in bold red.
+- **Gem cutter**: requires Apotheosis and Create Enchantment Industry. Cutting permission is checked against input purity. Defaults allow CRACKED → CHIPPED → FLAWED, then block further cutting from FLAWED or above.
+- **Rainbow names**: requires Apotheosis and KubeJS. Add item IDs to `perfectRainbowItems` to use Apotheosis' PERFECT rainbow color for their display names. The list is empty by default; missing items or unavailable colors retain the original name.
 
-### Gift code system
+These features provide cutting restrictions and name styling. CIR's custom KubeJS gem recipes are not bundled; pack authors must supply their own alternative upgrade recipes.
 
-A non-commercial gift code feature for community servers. Every code is open to all players and **can be redeemed once per player**; per-player or single-use codes are not supported.
+### Other compatibility fixes
 
-- `/cir giftCode` — open the redeem screen (no permission needed)
-- `/cir manageGiftCode` — open the management screen (permission 4)
+At startup, each patch checks its required mods and versions. Missing dependencies or unmatched conditions skip the patch before target classes are resolved. Startup logs report the result; optional integrations remain optional.
 
-A code can grant items, experience and status effects. The management screen supports creating, disabling and deleting codes; a disabled code counts as expired, and deleting removes its redemption records too.
-
-Codes live in `config/create_cir_addition/gift_codes.json`, generated on first launch. Redemption records are stored in the world save.
-
-Both screens show a disclaimer first, stating that this system does not support gift codes of any commercial nature.
-
-> Per Mojang's Commercial Usage Guidelines, servers may not sell content that affects game balance. The CIR team does not support gift code activity of any commercial nature.
-
-## Requirements
-
-| Dependency | Required | Version |
+| Fix | Activation condition | Scope |
 |---|---|---|
-| Minecraft | **Yes** | 1.21.1 |
-| NeoForge | **Yes** | 21.1+ |
-| Create | **Yes** | 6.0.0 – 6.x |
-| AE2 | Optional | 19+ (quantum limiter and generator control are skipped without it) |
+| ThroughputQuest legacy accessor failure | Both `throughput_quest` and `ae2` are installed | Repairs server detection and client rendering; validated against 1.0.0's legacy calls. Only exact accessor-call matches are rewritten; newer versions without those calls are untouched |
+| RollingGate configuration-loading hang | A **client** has `rolling_gate` version **exactly `1.1.0+build.66`** | Dispatches window attribute updates to the game thread instead of calling window APIs from the loading worker; dedicated servers do not load the patch |
 
-## Installation
+The ThroughputQuest patch replaces calls to AdvancedAE's removed private accessor with AE2 public getters. No third-party JAR changes are needed, and it does not replace the complete behavior of other versions.
 
-1. Download `create_cir_addition-3.4.2.jar`
-2. Drop it into `mods/` — **on a server, both the client and the server need it**
-3. Launch once to generate `config/create_cir_addition.toml`
-4. Adjust the config as needed, then `/reload` or restart
+#### Stock Bridge optimization (3.5.0fix, unreleased)
+
+Requires Create: AE2 Stock Bridge (`createstockbridge`) version **exactly 0.2.0**, plus Create and AE2.
+
+- Cache remote item keys per bridge and invalidate after actual reservation erasure.
+- Skip repeated remounts when polled contents have not changed.
+- Preserve upstream 20-tick polling, request handling, and remounts caused by priority or online-state changes.
+- Follow both the `stockBridgeOptimization` and `create` config switches.
+
+**Only the server needs this fix update; existing 3.5.0 clients remain compatible and must still have CIR Addition installed.** This local build passed compilation and offline cache, bytecode, protocol and Boss Guard checks. Final in-game Mixin composition and server MSPT comparisons have not been tested. The public 3.5.0 release does not include this fix.
 
 ## Commands
 
@@ -672,6 +703,8 @@ All commands live under `/cir`.
 | `/cir cleanup` | 4 | Sweep dropped items immediately (banners, shulker boxes and enchanted items are skipped) |
 | `/cir forceCleanup` | 4 | Force sweep: countdown, then clear every dropped item without binning it |
 | `/cir trashBin` | 0 | Open the trash bin (**available to everyone**) |
+| `/cir giftCode` | 0 | Open the gift code redemption screen |
+| `/cir manageGiftCode` | 4 | Open the gift code management screen |
 | `/cir redstoneLinkOptimization <true\|false>` | 4 | Toggle the redstone link cache at runtime |
 | `/cir ae2Generator` | 4 | Show the current state of both AE2 generators |
 | `/cir ae2Generator crystalResonance <true\|false>` | 4 | Enable or disable the crystal resonance generator |
@@ -680,7 +713,7 @@ All commands live under `/cir`.
 
 ## Configuration
 
-File: `config/create_cir_addition.toml`
+Main file: `config/create_cir_addition.toml`. Common settings are listed below in feature order; the generated config contains the full set and defaults.
 
 ### Module switches
 
@@ -688,6 +721,52 @@ File: `config/create_cir_addition.toml`
 network = true    # network compression
 create  = true    # master switch for the Create optimization mixins
 ```
+
+### Performance
+
+```toml
+smartBlockInterval = 3
+chainConveyorInterval = 2
+basinCheckInterval = 5
+mountedStorageSyncCooldown = 20
+```
+
+### Redstone links
+
+```toml
+redstoneLinkOptimization = true    # the /cir command can toggle this at runtime
+```
+
+### Item cleanup
+
+```toml
+cleanupIgnoreNamed = true     # protect items with a custom name
+cleanupOnHighMspt = true      # auto-clean once MSPT hits the red tier (≥ 70)
+```
+
+### Warnings
+
+```toml
+msptWarnEnabled = true
+```
+
+### Quantum rings
+
+```toml
+quantumLimitNear = 2
+quantumRadiusNear = 1024
+quantumLimitFar = 4
+quantumRadiusFar = 4096
+otherDimensionLimit = 4
+homeRadius = 256
+quantumLimiterEnabled = true    # master switch, restart required
+```
+
+> **`quantumLimiterEnabled` is read once at startup.**
+>
+> `/reload` and config hot-reload deliberately ignore it. The limiter depends on a persistent registry, and flipping the switch mid-run leaves the table out of sync with the world: turn it off and the table stays behind (switching back on would treat stale entries as live rings); turn it on and every existing ring is unregistered (the next chunk load judges them as new).
+>
+> Changing it requires a restart.
 
 ### Boss Guard
 
@@ -725,58 +804,74 @@ Separate config file: `config/create_cir_addition-boss-guard.json`
 - `lowHealthMinDamage` is per-group; defaults are 20 for `minecraft` and 15 for the others.
 - Apply changes with `/cir bossguard reload`; no restart needed.
 
-### Performance
+### Gem cutting and rainbow item names
 
 ```toml
-smartBlockInterval = 3
-chainConveyorInterval = 2
-basinCheckInterval = 5
-mountedStorageSyncCooldown = 20
+# Input purity; true only permits the original cutting rules
+gemCutAllowCracked = true
+gemCutAllowChipped = true
+gemCutAllowFlawed = false
+gemCutAllowNormal = false
+gemCutAllowFlawless = false
+gemCutAllowPerfect = false
+
+# Empty by default; add existing item IDs as needed
+perfectRainbowItems = []
 ```
 
-### Quantum rings
+Gem cutting requires Apotheosis + Create Enchantment Industry; rainbow names require Apotheosis + KubeJS. Restart after changing these settings.
+
+### Stock Bridge optimization (unreleased 3.5.0fix build)
 
 ```toml
-quantumLimitNear = 2
-quantumRadiusNear = 1024
-quantumLimitFar = 4
-quantumRadiusFar = 4096
-otherDimensionLimit = 4
-homeRadius = 256
-quantumLimiterEnabled = true    # master switch, restart required
+stockBridgeOptimization = true
 ```
 
-> **`quantumLimiterEnabled` is read once at startup.**
->
-> `/reload` and config hot-reload deliberately ignore it. The limiter depends on a persistent registry, and flipping the switch mid-run leaves the table out of sync with the world: turn it off and the table stays behind (switching back on would treat stale entries as live rings); turn it on and every existing ring is unregistered (the next chunk load judges them as new).
->
-> Changing it requires a restart.
+Requires exactly Stock Bridge 0.2.0, Create and AE2, and also follows the `create` master switch. This option is not included in the public 3.5.0 release.
 
-### Redstone links
+### Gift code data
 
-```toml
-redstoneLinkOptimization = true    # the /cir command can toggle this at runtime
-```
+File: `config/create_cir_addition/gift_codes.json`. Generated on first use; redemption records live in the world save. Use the in-game management screen for routine administration.
 
-### Item cleanup
+## Requirements and installation
 
-```toml
-cleanupIgnoreNamed = true     # protect items with a custom name
-cleanupOnHighMspt = true      # auto-clean once MSPT hits the red tier (≥ 70)
-```
+| Dependency | Required | Version |
+|---|---|---|
+| Minecraft | **Yes** | 1.21.1 |
+| NeoForge | **Yes** | 21.1+ |
+| Create | **Yes** | 6.0.0 – 6.x |
+| AE2 | Optional | 19+ (quantum limiter and generator control are skipped without it) |
+| Apotheosis | Optional | Required for Boss Guard and the related gem integrations |
+| Create Enchantment Industry / KubeJS | Optional | Gem cutting / rainbow item names, respectively |
+| ThroughputQuest / RollingGate | Optional | Patches apply only within the compatibility scope above |
 
-### Warnings
+### Installation steps
 
-```toml
-msptWarnEnabled = true
-```
+1. Download the required build from [Releases](https://github.com/CIR-Server/Create-CIR-Addition/releases) and put it in `mods/`. Multiplayer requires this mod on both the client and server.
+2. Launch once to generate the main config. The separate Boss Guard config is generated when Apotheosis is installed.
+3. Adjust the settings. Use `/cir bossguard reload` for Boss Guard; startup-only settings require a restart, and `/reload` is not a substitute for every config change.
 
-## Migration notes
+AE2, Apotheosis and the other integrations remain optional dependencies.
+
+## Upgrading and version compatibility
+
+| Build | Wire protocol | Multiplayer requirements |
+|---|---|---|
+| 3.5.0 (current public release) | `3.5.0` | CIR Addition is required on both client and server; 3.4.x and other protocols are rejected |
+| 3.5.0fix (unreleased local fix build) | `3.5.0` | Reuses existing payloads and codecs; an updated server accepts existing 3.5.0 clients, but not 3.4.x |
+
+3.5.0fix only adds the Stock Bridge fix; it does not make the entire mod optional on clients. Moving from 3.4.x to protocol 3.5.0 still requires updating both sides.
+
+### Quantum ring registry migration
 
 Upgrading from an older version:
 
 - **Existing rings are not registered automatically.** After upgrading, run `/cir quantum scan` once in-game to pull them into the table; otherwise they are judged as new rings
 - If the save already contains more rings than the current limits allow, **run scan before tightening the limits**
+
+## Changelog
+
+This README is organized by feature. Per-version changes live in [CHANGELOG.md](CHANGELOG.md), with downloads on [Releases](https://github.com/CIR-Server/Create-CIR-Addition/releases). Old 3.4.7 / 3.4.8 negotiation rules apply only to those historical builds, not to the current 3.5.0 protocol.
 
 ## AI Usage Disclosure
 
