@@ -247,7 +247,7 @@ ThroughputQuest 补丁用 AE2 公开 getter 替换已移除的 AdvancedAE 私有
 - 保留上游 20 tick 轮询、请求处理，以及优先级和在线状态变化触发的重新挂载。
 - 同时遵循 `stockBridgeOptimization` 与 `create` 配置开关。
 
-**这项修复仅需服务端更新，已有 3.5.0 客户端可继续使用；客户端仍须安装 CIR Addition。** 此本地修复构建已通过编译及离线缓存、字节码、协议与 BOSS 回归检查，尚未进行实际游戏中的 Mixin 合成验证或服务器 MSPT 对比。公开的 3.5.0 发行包不包含此修复。
+**这项修复仅需服务端更新，已有 3.5.0 客户端可继续使用；客户端仍须安装 CIR Addition。** 该修复已完成实机验证，并通过编译及离线缓存、字节码、协议与 BOSS 回归检查。公开的 3.5.0 发行包不包含此修复。
 
 ## 注册指令
 
@@ -687,7 +687,7 @@ Requires Create: AE2 Stock Bridge (`createstockbridge`) version **exactly 0.2.0*
 - Preserve upstream 20-tick polling, request handling, and remounts caused by priority or online-state changes.
 - Follow both the `stockBridgeOptimization` and `create` config switches.
 
-**Only the server needs this fix update; existing 3.5.0 clients remain compatible and must still have CIR Addition installed.** This local build passed compilation and offline cache, bytecode, protocol and Boss Guard checks. Final in-game Mixin composition and server MSPT comparisons have not been tested. The public 3.5.0 release does not include this fix.
+**Only the server needs this fix update; existing 3.5.0 clients remain compatible and must still have CIR Addition installed.** This fix has been verified in-game and passed compilation and offline cache, bytecode, protocol and Boss Guard checks. The public 3.5.0 release does not include this fix.
 
 ## Commands
 
