@@ -238,7 +238,7 @@ AE2 自带两个能给 ME 网络发电的方块。本模组提供运行时调节
 
 ThroughputQuest 补丁用 AE2 公开 getter 替换已移除的 AdvancedAE 私有访问器调用，不需要修改第三方 JAR，也不整体替换其他版本的模组逻辑。
 
-#### 库存桥接优化（3.5.0fix，尚未发布）
+#### 库存桥接优化（3.5.0fix）
 
 仅当 Create: AE2 Stock Bridge（`createstockbridge`）版本严格为 **0.2.0**，且安装 Create 与 AE2 时启用。
 
@@ -247,7 +247,7 @@ ThroughputQuest 补丁用 AE2 公开 getter 替换已移除的 AdvancedAE 私有
 - 保留上游 20 tick 轮询、请求处理，以及优先级和在线状态变化触发的重新挂载。
 - 同时遵循 `stockBridgeOptimization` 与 `create` 配置开关。
 
-**这项修复仅需服务端更新，已有 3.5.0 客户端可继续使用；客户端仍须安装 CIR Addition。** 该修复已完成实机验证，并通过编译及离线缓存、字节码、协议与 BOSS 回归检查。公开的 3.5.0 发行包不包含此修复。
+**这项修复仅需服务端更新，已有 3.5.0 客户端可继续使用；客户端仍须安装 CIR Addition。** 该修复已完成实机验证，并通过编译及离线缓存、字节码、协议与 BOSS 回归检查。库存桥接优化自 3.5.0fix 加入。
 
 ## 注册指令
 
@@ -269,7 +269,7 @@ ThroughputQuest 补丁用 AE2 公开 getter 替换已移除的 AdvancedAE 私有
 | `/cir ae2Generator` | 4 | 查看两个 AE2 发电方块的当前状态 |
 | `/cir ae2Generator crystalResonance <true\|false>` | 4 | 开关水晶谐振发电机 |
 | `/cir ae2Generator vibrationChamber <low\|normal\|boost>` | 4 | 切换谐振仓档位（Tab 补全） |
-| `/cir bossguard reload` | 2 | 原子重载 Boss Guard 配置；格式错误时保留上一份 |
+| `/cir bossguard reload` | 2 | 重新加载 BOSS 保护配置；新配置有误时继续使用原配置 |
 
 ## 配置文件
 
@@ -381,13 +381,13 @@ perfectRainbowItems = []
 
 切割限制需要 Apotheosis + Create Enchantment Industry；彩虹名称需要 Apotheosis + KubeJS。修改这些配置后重启游戏。
 
-### 库存桥接优化（未发布的 3.5.0fix 修复构建）
+### 库存桥接优化（3.5.0fix）
 
 ```toml
 stockBridgeOptimization = true
 ```
 
-仅在 Stock Bridge 版本严格为 0.2.0 且安装 Create、AE2 时生效，同时遵循 `create` 总开关。公开的 3.5.0 发行包不包含此项。
+仅在 Stock Bridge 版本严格为 0.2.0 且安装 Create、AE2 时生效，同时遵循 `create` 总开关。此配置项从 3.5.0fix 开始提供。
 
 ### 兑换码数据
 
@@ -417,8 +417,8 @@ AE2、Apotheosis 等属于可选联动，不会因本模组变成必装项。
 
 | 构建 | 网络协议 | 联机要求 |
 |---|---|---|
-| 3.5.0（当前公开发行版） | `3.5.0` | 客户端与服务端都需要 CIR Addition 3.5.0；不接受 3.4.x 或其他协议 |
-| 3.5.0fix（尚未发布的本地修复构建） | `3.5.0` | 沿用原有数据包与编解码，服务端可接受已有 3.5.0 客户端；不接受 3.4.x |
+| 3.5.0 | `3.5.0` | 客户端与服务端都需要 CIR Addition 3.5.0；不接受 3.4.x 或其他协议 |
+| 3.5.0fix | `3.5.0` | 沿用原有数据包与编解码，服务端可接受已有 3.5.0 客户端；不接受 3.4.x |
 
 3.5.0fix 只增加库存桥接修复，并没有把整个模组改成“客户端可选”。由 3.4.x 升级到 3.5.0 协议时仍需同时升级客户端和服务端。
 
@@ -678,7 +678,7 @@ At startup, each patch checks its required mods and versions. Missing dependenci
 
 The ThroughputQuest patch replaces calls to AdvancedAE's removed private accessor with AE2 public getters. No third-party JAR changes are needed, and it does not replace the complete behavior of other versions.
 
-#### Stock Bridge optimization (3.5.0fix, unreleased)
+#### Stock Bridge optimization (3.5.0fix)
 
 Requires Create: AE2 Stock Bridge (`createstockbridge`) version **exactly 0.2.0**, plus Create and AE2.
 
@@ -687,7 +687,7 @@ Requires Create: AE2 Stock Bridge (`createstockbridge`) version **exactly 0.2.0*
 - Preserve upstream 20-tick polling, request handling, and remounts caused by priority or online-state changes.
 - Follow both the `stockBridgeOptimization` and `create` config switches.
 
-**Only the server needs this fix update; existing 3.5.0 clients remain compatible and must still have CIR Addition installed.** This fix has been verified in-game and passed compilation and offline cache, bytecode, protocol and Boss Guard checks. The public 3.5.0 release does not include this fix.
+**Only the server needs this fix update; existing 3.5.0 clients remain compatible and must still have CIR Addition installed.** This fix has been verified in-game and passed compilation and offline cache, bytecode, protocol and Boss Guard checks. Stock Bridge optimization was added in 3.5.0fix.
 
 ## Commands
 
@@ -709,7 +709,7 @@ All commands live under `/cir`.
 | `/cir ae2Generator` | 4 | Show the current state of both AE2 generators |
 | `/cir ae2Generator crystalResonance <true\|false>` | 4 | Enable or disable the crystal resonance generator |
 | `/cir ae2Generator vibrationChamber <low\|normal\|boost>` | 4 | Switch the vibration chamber tier (tab-completed) |
-| `/cir bossguard reload` | 2 | Atomically reload the Boss Guard config; invalid edits keep the previous policy |
+| `/cir bossguard reload` | 2 | Reload the Boss Guard configuration; invalid settings leave the current configuration in use |
 
 ## Configuration
 
@@ -821,13 +821,13 @@ perfectRainbowItems = []
 
 Gem cutting requires Apotheosis + Create Enchantment Industry; rainbow names require Apotheosis + KubeJS. Restart after changing these settings.
 
-### Stock Bridge optimization (unreleased 3.5.0fix build)
+### Stock Bridge optimization (3.5.0fix)
 
 ```toml
 stockBridgeOptimization = true
 ```
 
-Requires exactly Stock Bridge 0.2.0, Create and AE2, and also follows the `create` master switch. This option is not included in the public 3.5.0 release.
+Requires exactly Stock Bridge 0.2.0, Create and AE2, and also follows the `create` master switch. This option is available starting with 3.5.0fix.
 
 ### Gift code data
 
@@ -857,8 +857,8 @@ AE2, Apotheosis and the other integrations remain optional dependencies.
 
 | Build | Wire protocol | Multiplayer requirements |
 |---|---|---|
-| 3.5.0 (current public release) | `3.5.0` | CIR Addition is required on both client and server; 3.4.x and other protocols are rejected |
-| 3.5.0fix (unreleased local fix build) | `3.5.0` | Reuses existing payloads and codecs; an updated server accepts existing 3.5.0 clients, but not 3.4.x |
+| 3.5.0 | `3.5.0` | CIR Addition is required on both client and server; 3.4.x and other protocols are rejected |
+| 3.5.0fix | `3.5.0` | Reuses existing payloads and codecs; an updated server accepts existing 3.5.0 clients, but not 3.4.x |
 
 3.5.0fix only adds the Stock Bridge fix; it does not make the entire mod optional on clients. Moving from 3.4.x to protocol 3.5.0 still requires updating both sides.
 
