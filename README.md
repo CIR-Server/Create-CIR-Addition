@@ -5,13 +5,13 @@
 [![Create](https://img.shields.io/badge/Create-6.x-blue)](https://modrinth.com/mod/create)
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey)](https://creativecommons.org/licenses/by-sa/4.0/)
 
-面向机械动力整合包和服务器，提供性能优化、兼容修复、管理工具与可配置的模组联动。
+面向机械动力整合包和服务器，提供**性能优化、兼容修复、管理工具与可配置的模组联动**。
 
-Performance optimizations, compatibility fixes, administration tools and configurable integrations for Create-based modpacks and servers.
+**Performance optimizations, compatibility fixes, administration tools and configurable integrations** for Create-based modpacks and servers.
 
-点击查看中文介绍视频：https://www.bilibili.com/video/BV1vHy2zSEVa
+点击查看**中文**介绍视频：https://www.bilibili.com/video/BV1vHy2zSEVa
 
-Tap to watch introduction video in English: https://youtu.be/kJ3f6Zn2YAQ
+Tap to watch introduction video in **English**: https://youtu.be/kJ3f6Zn2YAQ
 
 [简体中文](#中文) | [English](#english)
 
