@@ -9,6 +9,10 @@
 
 Performance optimizations, compatibility fixes, administration tools and configurable integrations for Create-based modpacks and servers.
 
+点击查看中文介绍视频：https://www.bilibili.com/video/BV1vHy2zSEVa
+
+Tap to watch introduction video in English: https://youtu.be/kJ3f6Zn2YAQ
+
 [简体中文](#中文) | [English](#english)
 
 支持简体中文、繁体中文与英文 / Available in Simplified Chinese, Traditional Chinese and English.
